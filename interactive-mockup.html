@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVE Map - Interactive UI Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            max-width: 1200px;
+        }
+
+        .phone-mockup {
+            width: 375px;
+            height: 812px;
+            background: white;
+            border: 12px solid black;
+            border-radius: 40px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: #333;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .header {
+            height: 60px;
+            background: #2196F3;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .screen-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: white;
+        }
+
+        .tab-bar {
+            height: 49px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .tab-bar div {
+            padding: 8px 12px;
+            text-align: center;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-bar div.active {
+            color: #2196F3;
+            border-bottom-color: #2196F3;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Map Search Screen */
+        .search-bar {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            background: #f5f5f5;
+        }
+
+        .search-bar::placeholder {
+            color: #999;
+        }
+
+        .system-card {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .system-card:hover {
+            background: #f0f0f0;
+            border-color: #2196F3;
+        }
+
+        .system-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #212121;
+        }
+
+        .system-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .security-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .hs {
+            background: #00d000;
+        }
+
+        .ls {
+            background: #ffaa00;
+        }
+
+        .ns {
+            background: #ff4444;
+        }
+
+        /* Route Planner Screen */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .checkbox-item input {
+            cursor: pointer;
+        }
+
+        .button {
+            width: 100%;
+            height: 48px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button:hover {
+            background: #1976d2;
+        }
+
+        .button:active {
+            background: #0d47a1;
+        }
+
+        .result-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 16px;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+
+        .result-item {
+            font-size: 13px;
+            color: #1b5e20;
+            margin: 4px 0;
+        }
+
+        /* Capital Planner Screen */
+        .ship-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .ship-option {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            background: white;
+        }
+
+        .ship-option:hover {
+            border-color: #2196F3;
+            background: #f5f5f5;
+        }
+
+        .ship-option.selected {
+            background: #bbdefb;
+            border-color: #2196F3;
+            font-weight: bold;
+        }
+
+        .button-secondary {
+            width: 100%;
+            height: 48px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button-secondary:hover {
+            background: #f57c00;
+        }
+
+        /* Settings Screen */
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #2196F3;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .status-text {
+            font-size: 13px;
+            color: #2e7d32;
+        }
+
+        .about-text {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            color: white;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-panel h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-panel p {
+            font-size: 14px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            opacity: 0.9;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            font-size: 14px;
+            margin-left: 0;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .info-panel {
+                order: -1;
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="phone-mockup">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>●●●●● 100%</span>
+            </div>
+
+            <div class="header">
+                <span id="screen-title">EVE Map</span>
+                <span style="font-size: 18px; cursor: pointer;">⚙️</span>
+            </div>
+
+            <div class="screen-content">
+                <!-- Map Search Screen -->
+                <div class="screen active" id="screen-0">
+                    <input type="text" class="search-bar" placeholder="🔍 Search Systems">
+
+                    <div class="system-card">
+                        <div class="system-name">Jita IV - Moon 4</div>
+                        <div class="system-info">
+                            <span>ID: 30000142</span>
+                            <span class="security-badge hs">HS 5.0</span>
+                        </div>
+                    </div>
+
+                    <div class="system-card">
+                        <div class="system-name">Perimeter</div>
+                        <div class="system-info">
+                            <span>ID: 30000144</span>
+                            <span class="security-badge hs">HS 5.0</span>
+                        </div>
+                    </div>
+
+                    <div class="system-card">
+                        <div class="system-name">Isanamo</div>
+                        <div class="system-info">
+                            <span>ID: 30001161</span>
+                            <span class="security-badge hs">HS 5.0</span>
+                        </div>
+                    </div>
+
+                    <div class="system-card">
+                        <div class="system-name">Urlen</div>
+                        <div class="system-info">
+                            <span>ID: 30002060</span>
+                            <span class="security-badge ls">LS 0.4</span>
+                        </div>
+                    </div>
+
+                    <div class="system-card">
+                        <div class="system-name">Sobaseki</div>
+                        <div class="system-info">
+                            <span>ID: 30002768</span>
+                            <span class="security-badge ns">NS -5.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route Planner Screen -->
+                <div class="screen" id="screen-1">
+                    <div class="form-group">
+                        <label class="form-label">Origin System ID</label>
+                        <input type="number" class="form-input" value="30000142" placeholder="Enter system ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Destination System ID</label>
+                        <input type="number" class="form-input" value="30000144" placeholder="Enter system ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Avoidance Options</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox">
+                                <span>Avoid Low-Sec</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox">
+                                <span>Avoid Null-Sec</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox">
+                                <span>Avoid Wormholes</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="button">Plan Route</button>
+
+                    <div class="result-box" style="margin-top: 16px;">
+                        <div class="result-title">Route Found!</div>
+                        <div class="result-item">📍 Jumps: 4</div>
+                        <div class="result-item">🎯 Distance: 0.04 LY</div>
+                        <div class="result-item">⏱️ Time: ~4 minutes</div>
+                    </div>
+                </div>
+
+                <!-- Capital Planner Screen -->
+                <div class="screen" id="screen-2">
+                    <label class="form-label" style="margin-bottom: 12px;">Select Ship</label>
+                    <div class="ship-selector">
+                        <div class="ship-option selected" onclick="this.classList.toggle('selected'); document.querySelectorAll('.ship-option').forEach(s => s !== this && s.classList.remove('selected'));">Nyx (Supercarrier) - 8.75 LY</div>
+                        <div class="ship-option" onclick="this.classList.toggle('selected'); document.querySelectorAll('.ship-option').forEach(s => s !== this && s.classList.remove('selected'));">Erebus (Titan) - 8.8 LY</div>
+                        <div class="ship-option" onclick="this.classList.toggle('selected'); document.querySelectorAll('.ship-option').forEach(s => s !== this && s.classList.remove('selected'));">Hel (Carrier) - 7.5 LY</div>
+                        <div class="ship-option" onclick="this.classList.toggle('selected'); document.querySelectorAll('.ship-option').forEach(s => s !== this && s.classList.remove('selected'));">Moros (Dread) - 7.5 LY</div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label class="form-label">Origin System ID</label>
+                        <input type="number" class="form-input" value="30000142">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Destination System ID</label>
+                        <input type="number" class="form-input" value="30000144">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Advanced Spaceship Command (0-5)</label>
+                        <input type="number" class="form-input" value="5" min="0" max="5">
+                    </div>
+
+                    <button class="button-secondary">Plan Jump Chain</button>
+
+                    <div class="result-box" style="margin-top: 16px;">
+                        <div class="result-title">Jump Chain Summary</div>
+                        <div class="result-item">🎯 Jumps: 4</div>
+                        <div class="result-item">🌐 Distance: 0.04 LY</div>
+                        <div class="result-item">⛽ Fuel: 7.0 units</div>
+                        <div class="result-item">🔄 Refuel: No</div>
+                    </div>
+                </div>
+
+                <!-- Settings Screen -->
+                <div class="screen" id="screen-3">
+                    <div class="settings-section">
+                        <div class="settings-title">API Configuration</div>
+                        <label class="form-label">API URL</label>
+                        <input type="text" class="form-input" value="https://evemap-api.herokuapp.com" style="font-size: 12px;">
+                        <button class="button" style="margin-top: 12px;">Save & Connect</button>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-title">Status</div>
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                            <div class="status-text">API Connected</div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-title">About</div>
+                        <div class="about-text"><strong>EVE Map Visualization</strong></div>
+                        <div class="about-text">Version: 1.0.0</div>
+                        <div class="about-text">A 2D starmap viewer for EVE Online</div>
+                        <div class="about-text">Platforms: iOS (SwiftUI) • Android (Compose)</div>
+                        <div class="about-text" style="margin-top: 12px; opacity: 0.7;">Powered by ESI API</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-bar">
+                <div class="active" onclick="switchScreen(0)">🗺️</div>
+                <div onclick="switchScreen(1)">🛣️</div>
+                <div onclick="switchScreen(2)">🚀</div>
+                <div onclick="switchScreen(3)">⚙️</div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h1>EVE Map</h1>
+            <p>A complete cross-platform 2D starmap for EVE Online with live activity heatmaps, route planning, and capital jump chains.</p>
+
+            <h3 style="margin-top: 20px; margin-bottom: 12px;">Features</h3>
+            <ul class="feature-list">
+                <li>Interactive starmap with 8000+ systems</li>
+                <li>Advanced route planning with avoidance</li>
+                <li>Capital ship jump planning with dogma</li>
+                <li>Live intel & activity heatmaps</li>
+                <li>iOS & Android native apps</li>
+                <li>Offline support with graph caching</li>
+                <li>Complete REST API backend</li>
+            </ul>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                <p style="font-size: 12px; opacity: 0.8;">← Click tabs to explore all 4 screens</p>
+                <p style="font-size: 12px; opacity: 0.8; margin-top: 10px;">Try clicking buttons and inputs!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchScreen(index) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-bar div').forEach(t => t.classList.remove('active'));
+
+            // Show selected screen
+            document.getElementById(`screen-${index}`).classList.add('active');
+            document.querySelectorAll('.tab-bar div')[index].classList.add('active');
+
+            // Update header
+            const titles = ['EVE Map', 'Route Planner', 'Capital Planner', 'Settings'];
+            document.getElementById('screen-title').textContent = titles[index];
+        }
+    </script>
+</body>
+</html>
