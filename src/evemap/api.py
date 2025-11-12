@@ -454,6 +454,179 @@ def create_app(db_manager: DatabaseManager = None) -> FastAPI:
                 detail="Graph not exported. Run /admin/export-graph first."
             )
 
+    # =====================================================================
+    # Heatmap & Intel Endpoints (Phase 2)
+    # =====================================================================
+
+    @app.get("/intel/activity")
+    async def get_activity_heatmap(background_tasks: BackgroundTasks):
+        """Get activity heatmap (kills and jumps).
+
+        Cached for 5-10 minutes (ESI best practice).
+
+        Returns:
+            Activity heatmap with kills and jumps per system
+        """
+        from .heatmap import HeatmapEngine
+
+        cache_key = "activity_heatmap"
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+
+        try:
+            engine = HeatmapEngine(db_manager)
+            activity = engine.get_activity_heatmap()
+
+            # Cache for 10 minutes
+            cache.set(cache_key, activity)
+
+            return activity
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"Failed to fetch activity data: {str(e)}"
+            )
+
+    @app.get("/intel/incursions")
+    async def get_incursions():
+        """Get active incursions.
+
+        Returns:
+            List of active incursions with affected systems
+        """
+        from .heatmap import HeatmapEngine
+
+        cache_key = "incursions"
+        cached = cache.get(cache_key)
+        if cached:
+            return {"incursions": cached}
+
+        try:
+            engine = HeatmapEngine(db_manager)
+            incursions = engine.get_incursions()
+
+            cache.set(cache_key, incursions)
+
+            return {"incursions": incursions}
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"Failed to fetch incursion data: {str(e)}"
+            )
+
+    @app.get("/intel/sovereignty")
+    async def get_sovereignty():
+        """Get sovereignty data for regions and systems.
+
+        Returns:
+            Sovereignty map indexed by system ID
+        """
+        from .heatmap import HeatmapEngine
+
+        cache_key = "sovereignty"
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+
+        try:
+            engine = HeatmapEngine(db_manager)
+            sov = engine.get_sovereignty_map()
+
+            cache.set(cache_key, sov)
+
+            return {"sovereignty": sov}
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"Failed to fetch sovereignty data: {str(e)}"
+            )
+
+    @app.get("/intel/campaigns")
+    async def get_campaigns():
+        """Get active sovereignty campaigns.
+
+        Returns:
+            List of active sov campaigns
+        """
+        from .heatmap import HeatmapEngine
+
+        cache_key = "campaigns"
+        cached = cache.get(cache_key)
+        if cached:
+            return {"campaigns": cached}
+
+        try:
+            engine = HeatmapEngine(db_manager)
+            campaigns = engine.get_sov_campaigns()
+
+            cache.set(cache_key, campaigns)
+
+            return {"campaigns": campaigns}
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"Failed to fetch campaign data: {str(e)}"
+            )
+
+    @app.get("/intel/all")
+    async def get_all_intel():
+        """Get all live intel layers combined.
+
+        Returns activity, incursions, sov, and campaigns in one call.
+
+        Returns:
+            Complete intel object
+        """
+        from .heatmap import HeatmapEngine
+
+        cache_key = "all_intel"
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+
+        try:
+            engine = HeatmapEngine(db_manager)
+            intel = engine.get_intel_layers()
+
+            cache.set(cache_key, intel)
+
+            return intel
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"Failed to fetch intel data: {str(e)}"
+            )
+
+    @app.post("/admin/refresh-intel")
+    async def refresh_intel(background_tasks: BackgroundTasks):
+        """Manually refresh intel layers (clears cache).
+
+        Returns:
+            Status
+        """
+        def _refresh():
+            cache.cache_dir.glob('*.json')
+            from pathlib import Path
+            for cache_file in cache.cache_dir.glob('*.json'):
+                if 'intel' in cache_file.name or 'activity' in cache_file.name:
+                    try:
+                        cache_file.unlink()
+                    except:
+                        pass
+
+        background_tasks.add_task(_refresh)
+
+        return {
+            "status": "refreshing",
+            "message": "Intel cache cleared. New data will be fetched on next request."
+        }
+
     return app
 
 

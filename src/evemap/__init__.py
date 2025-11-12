@@ -37,6 +37,9 @@ from .graph_engine import GraphEngine
 # Caching
 from .cache import ESICache
 
+# Heatmaps & Intel
+from .heatmap import HeatmapEngine
+
 # API
 from .api import create_app
 
@@ -60,6 +63,8 @@ __all__ = [
     "GraphEngine",
     # Caching
     "ESICache",
+    # Heatmaps
+    "HeatmapEngine",
     # API
     "create_app",
 ]
