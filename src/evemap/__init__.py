@@ -40,6 +40,10 @@ from .cache import ESICache
 # Heatmaps & Intel
 from .heatmap import HeatmapEngine
 
+# Capital Jump Planner
+from .dogma import DogmaCalculator, ShipConfig, ShipConfigManager
+from .capital_planner import CapitalJumpPlanner, JumpLeg, JumpChain, JumpSphere
+
 # API
 from .api import create_app
 
@@ -65,6 +69,14 @@ __all__ = [
     "ESICache",
     # Heatmaps
     "HeatmapEngine",
+    # Capital Planner (Phase 3)
+    "DogmaCalculator",
+    "ShipConfig",
+    "ShipConfigManager",
+    "CapitalJumpPlanner",
+    "JumpLeg",
+    "JumpChain",
+    "JumpSphere",
     # API
     "create_app",
 ]

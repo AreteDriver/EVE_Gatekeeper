@@ -82,6 +82,24 @@ class UniverseStatsResponse(BaseModel):
     security_breakdown: Dict[str, int]
 
 
+class JumpChainRequest(BaseModel):
+    """Request for capital jump chain planning."""
+    origin: int
+    destination: int
+    ship_type_id: int
+    skills: Dict[str, int] = {}  # {"advanced_spaceship_command": 5, ...}
+    max_fuel: Optional[int] = None
+    avoid_systems: List[int] = []
+    avoid_lowsec: bool = False
+
+
+class JumpSphereRequest(BaseModel):
+    """Request for jump sphere calculation."""
+    origin: int
+    ship_type_id: int
+    skills: Dict[str, int] = {}
+
+
 # ============================================================================
 # Application Setup
 # ============================================================================
@@ -391,6 +409,158 @@ def create_app(db_manager: DatabaseManager = None) -> FastAPI:
                 for system_id, name, score in bottlenecks
             ]
         }
+
+    # =====================================================================
+    # Capital Jump Planner Endpoints (Phase 3)
+    # =====================================================================
+
+    @app.post("/capital/jump-chain")
+    async def plan_jump_chain(request: JumpChainRequest):
+        """Plan a multi-leg jump route for capital ships.
+
+        Calculates optimal path with refuel stops based on ship and skills.
+
+        Args:
+            request: JumpChainRequest with origin, destination, ship, skills
+
+        Returns:
+            JumpChain with complete route or error
+        """
+        from .capital_planner import CapitalJumpPlanner
+
+        try:
+            planner = CapitalJumpPlanner(db_manager)
+
+            chain = planner.plan_jump_chain(
+                origin_system_id=request.origin,
+                destination_system_id=request.destination,
+                ship_type_id=request.ship_type_id,
+                skill_levels=request.skills if request.skills else None,
+                max_fuel=request.max_fuel,
+                avoid_systems=set(request.avoid_systems),
+                avoid_lowsec=request.avoid_lowsec,
+            )
+
+            if not chain:
+                raise HTTPException(
+                    status_code=404,
+                    detail="No jump route possible with given ship and skills"
+                )
+
+            return chain.to_dict()
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Jump planning failed: {str(e)}"
+            )
+
+    @app.post("/capital/jump-sphere")
+    async def get_jump_sphere(request: JumpSphereRequest):
+        """Get all systems within jump range of an origin.
+
+        Args:
+            request: JumpSphereRequest with origin, ship, skills
+
+        Returns:
+            JumpSphere with all reachable systems
+        """
+        from .capital_planner import CapitalJumpPlanner
+
+        try:
+            planner = CapitalJumpPlanner(db_manager)
+
+            sphere = planner.find_jump_sphere(
+                origin_system_id=request.origin,
+                ship_type_id=request.ship_type_id,
+                skill_levels=request.skills if request.skills else None,
+            )
+
+            if not sphere:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Ship type or system not found"
+                )
+
+            return sphere.to_dict()
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Sphere calculation failed: {str(e)}"
+            )
+
+    @app.get("/capital/ships")
+    async def get_capital_ships(region_id: Optional[int] = None):
+        """Get available capital ship options.
+
+        Args:
+            region_id: Optional filter by region
+
+        Returns:
+            List of capital ships with stats
+        """
+        from .capital_planner import CapitalJumpPlanner
+
+        try:
+            planner = CapitalJumpPlanner(db_manager)
+            ships = planner.get_ship_options(region_id=region_id)
+            return {"ships": ships}
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Failed to get ships: {str(e)}"
+            )
+
+    @app.get("/capital/ships/{ship_type_id}")
+    async def get_ship_details(ship_type_id: int):
+        """Get details for a specific capital ship.
+
+        Args:
+            ship_type_id: EVE ship type ID
+
+        Returns:
+            Ship details with base specs and range calculations
+        """
+        from .capital_planner import CapitalJumpPlanner
+        from .dogma import DogmaCalculator
+
+        try:
+            dogma = DogmaCalculator()
+            ship = dogma.get_ship(ship_type_id)
+
+            if not ship:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Ship not found"
+                )
+
+            # Calculate ranges with different skill levels
+            ranges = {}
+            for skill_level in [0, 3, 5]:
+                skills = {
+                    "advanced_spaceship_command": skill_level,
+                }
+                max_range = dogma.calculate_jump_range(ship_type_id, skills)
+                ranges[f"skill_level_{skill_level}"] = max_range
+
+            return {
+                "ship_type_id": ship.ship_type_id,
+                "ship_name": ship.ship_name,
+                "ship_class": ship.ship_class.value,
+                "base_range_ly": ship.base_jump_range,
+                "mass_kg": ship.mass,
+                "fuel_capacity_units": ship.fuel_capacity,
+                "fuel_consumption_per_ly": ship.jump_drive_fuel_consumption,
+                "ranges_by_skill": ranges,
+            }
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Failed to get ship: {str(e)}"
+            )
 
     # =====================================================================
     # Admin Endpoints
