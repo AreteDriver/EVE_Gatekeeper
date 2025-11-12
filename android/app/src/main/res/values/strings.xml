@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EVE Map</string>
+    <string name="app_description">2D Starmap for EVE Online</string>
+
+    <!-- Navigation -->
+    <string name="nav_map">Map</string>
+    <string name="nav_routes">Routes</string>
+    <string name="nav_capital">Capital</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Map Screen -->
+    <string name="search_systems">Search Systems</string>
+    <string name="search_hint">Enter system name</string>
+    <string name="system_id">ID: %d</string>
+
+    <!-- Route Planner -->
+    <string name="route_planner">Route Planner</string>
+    <string name="origin_system">Origin System ID</string>
+    <string name="destination_system">Destination System ID</string>
+    <string name="plan_route">Plan Route</string>
+    <string name="no_route">No route found</string>
+
+    <!-- Capital Planner -->
+    <string name="capital_planner">Capital Jump Planner</string>
+    <string name="select_ship">Select Ship</string>
+    <string name="plan_jump_chain">Plan Jump Chain</string>
+    <string name="advanced_spaceship_command">Advanced Spaceship Command (0-5)</string>
+    <string name="jump_chain_summary">Jump Chain Summary</string>
+    <string name="total_jumps">Total Jumps: %d</string>
+    <string name="total_distance">Distance: %.2f LY</string>
+    <string name="total_fuel">Fuel: %d units</string>
+    <string name="refuel_needed">Refuel Needed: %s</string>
+    <string name="jump_legs">Jump Legs</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="api_url">API URL</string>
+    <string name="save_connect">Save &amp; Connect</string>
+    <string name="api_connection">API Connection</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="about">About</string>
+    <string name="version">Version: 1.0.0</string>
+    <string name="app_subtitle">A 2D starmap viewer for EVE Online</string>
+    <string name="powered_by">Powered by ESI API</string>
+
+    <!-- Status -->
+    <string name="loading">Loading…</string>
+    <string name="error">Error</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="retry">Retry</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.EVEMap" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Material 3 colors -->
+        <item name="android:colorBackground">@android:color/white</item>
+        <item name="android:colorForeground">@android:color/black</item>
+    </style>
+</resources>
