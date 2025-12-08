@@ -210,13 +210,22 @@ def calculate_route():
     if not data:
         return jsonify({'error': 'Request body required'}), 400
     
-    origin_id = data.get('origin_id', type=int)
-    dest_id = data.get('destination_id', type=int)
+    origin_id = data.get('origin_id')
+    dest_id = data.get('destination_id')
     max_jumps = data.get('max_jumps', 50)
     avoid_low = data.get('avoid_low_sec', False)
     avoid_null = data.get('avoid_null_sec', False)
     
-    if not origin_id or not dest_id:
+    # Validate and convert to int
+    try:
+        if origin_id is not None:
+            origin_id = int(origin_id)
+        if dest_id is not None:
+            dest_id = int(dest_id)
+    except (ValueError, TypeError):
+        return jsonify({'error': 'origin_id and destination_id must be integers'}), 400
+    
+    if origin_id is None or dest_id is None:
         return jsonify({'error': 'origin_id and destination_id required'}), 400
     
     if origin_id not in _systems or dest_id not in _systems:
@@ -414,5 +423,7 @@ def run_api(host: str = '0.0.0.0', port: int = 5000, debug: bool = False):
 
 
 if __name__ == '__main__':
-    # For testing only
-    run_api(debug=True)
+    # For testing only - debug mode should not be used in production
+    import os
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    run_api(debug=debug)

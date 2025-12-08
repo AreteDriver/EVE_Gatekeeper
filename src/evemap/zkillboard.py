@@ -40,7 +40,10 @@ class ZKillboardClient:
             endpoint: API endpoint (without base URL)
             
         Returns:
-            Response data or None on failure
+            List of kill data dictionaries, or None if request fails
+            
+        Raises:
+            No exceptions are raised; errors are logged and None is returned
         """
         self._rate_limit()
         
