@@ -2,3 +2,20 @@ __pycache__/
 *.py[cod]
 .venv/
 .DS_Store
+.cache/
+*.egg-info/
+dist/
+build/
+
+# Mobile app
+mobile-app/node_modules/
+mobile-app/.expo/
+mobile-app/.expo-shared/
+mobile-app/npm-debug.*
+mobile-app/*.jks
+mobile-app/*.p8
+mobile-app/*.p12
+mobile-app/*.key
+mobile-app/*.mobileprovision
+mobile-app/*.orig.*
+mobile-app/web-build/
