@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "version": "0.1.0",
+    "source": "arete_universe_mvp",
+    "last_updated": "2025-12-09"
+  },
+  "systems": {
+    "Jita": {
+      "id": 30000142,
+      "region_id": 10000002,
+      "security": 0.9,
+      "category": "highsec",
+      "position": { "x": 0.0, "y": 0.0 }
+    },
+    "Perimeter": {
+      "id": 30000144,
+      "region_id": 10000002,
+      "security": 1.0,
+      "category": "highsec",
+      "position": { "x": 1.0, "y": 0.0 }
+    },
+    "Niarja": {
+      "id": 30003504,
+      "region_id": 10000060,
+      "security": 0.5,
+      "category": "lowsec",
+      "position": { "x": 5.0, "y": 0.0 }
+    }
+  },
+  "gates": [
+    { "from": "Jita", "to": "Perimeter", "distance": 1 },
+    { "from": "Perimeter", "to": "Niarja", "distance": 3 }
+  ]
+}
