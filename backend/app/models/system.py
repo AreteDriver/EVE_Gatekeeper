@@ -1,4 +1,3 @@
-from typing import Dict, List
 from pydantic import BaseModel
 
 
@@ -30,8 +29,8 @@ class UniverseMetadata(BaseModel):
 
 class Universe(BaseModel):
     metadata: UniverseMetadata
-    systems: Dict[str, System]
-    gates: List[Gate]
+    systems: dict[str, System]
+    gates: list[Gate]
 
 
 class SystemSummary(BaseModel):

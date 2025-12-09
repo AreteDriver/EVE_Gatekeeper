@@ -1,4 +1,3 @@
-from typing import Dict, List, Tuple
 import math
 
 from .data_loader import load_universe, load_risk_config
@@ -6,9 +5,9 @@ from .risk_engine import compute_risk
 from ..models.route import RouteResponse, RouteHop
 
 
-def _build_graph() -> Dict[str, Dict[str, float]]:
+def _build_graph() -> dict[str, dict[str, float]]:
     universe = load_universe()
-    graph: Dict[str, Dict[str, float]] = {name: {} for name in universe.systems}
+    graph: dict[str, dict[str, float]] = {name: {} for name in universe.systems}
 
     for gate in universe.gates:
         graph[gate.from_system][gate.to_system] = gate.distance
@@ -17,13 +16,13 @@ def _build_graph() -> Dict[str, Dict[str, float]]:
     return graph
 
 
-def _dijkstra(graph: Dict[str, Dict[str, float]], start: str, end: str, profile: str) -> Tuple[List[str], float]:
+def _dijkstra(graph: dict[str, dict[str, float]], start: str, end: str, profile: str) -> tuple[list[str], float]:
     cfg = load_risk_config()
     profile_cfg = cfg.routing_profiles.get(profile, cfg.routing_profiles["shortest"])
     risk_factor = profile_cfg.get("risk_factor", 0.0)
 
-    dist: Dict[str, float] = {node: math.inf for node in graph}
-    prev: Dict[str, str | None] = {node: None for node in graph}
+    dist: dict[str, float] = {node: math.inf for node in graph}
+    prev: dict[str, str | None] = {node: None for node in graph}
     visited: set[str] = set()
 
     dist[start] = 0.0
@@ -50,7 +49,7 @@ def _dijkstra(graph: Dict[str, Dict[str, float]], start: str, end: str, profile:
         return [], math.inf
 
     node = end
-    path: List[str] = []
+    path: list[str] = []
     while node is not None:
         path.append(node)
         node = prev[node]  # type: ignore
@@ -71,7 +70,7 @@ def compute_route(from_system: str, to_system: str, profile: str = "shortest") -
     if not path_names:
         raise ValueError("No route found")
 
-    hops: List[RouteHop] = []
+    hops: list[RouteHop] = []
     total_risk = 0.0
     max_risk = 0.0
     cumulative_cost = 0.0

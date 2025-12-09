@@ -1,6 +1,5 @@
 import json
 from functools import lru_cache
-from typing import List
 
 from ..core.config import settings
 from ..models.system import Universe, UniverseMetadata, System, Gate
@@ -31,7 +30,7 @@ def load_risk_config() -> RiskConfig:
     return RiskConfig(**raw)
 
 
-def get_neighbors(system_name: str) -> List[Gate]:
+def get_neighbors(system_name: str) -> list[Gate]:
     universe = load_universe()
     return [
         gate

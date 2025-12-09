@@ -1,4 +1,3 @@
-from typing import List
 from pydantic import BaseModel
 
 
@@ -18,4 +17,4 @@ class RouteResponse(BaseModel):
     total_cost: float
     max_risk: float
     avg_risk: float
-    path: List[RouteHop]
+    path: list[RouteHop]
