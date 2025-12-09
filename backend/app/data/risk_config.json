@@ -1,0 +1,40 @@
+{
+  "security_category_weights": {
+    "highsec": 1.0,
+    "lowsec": 3.0,
+    "nullsec": 5.0,
+    "wh": 4.0
+  },
+  "kill_weights": {
+    "recent_kills": 0.05,
+    "recent_pods": 0.1
+  },
+  "clamp": {
+    "min": 0,
+    "max": 100
+  },
+  "risk_colors": {
+    "0-10": "#3AF57A",
+    "10-25": "#A6F53A",
+    "25-50": "#F5D33A",
+    "50-75": "#F58C3A",
+    "75-100": "#F53A3A"
+  },
+  "map_layers": {
+    "show_system_security": true,
+    "show_risk_heat": true,
+    "show_routes": true,
+    "show_gate_lines": true
+  },
+  "routing_profiles": {
+    "shortest": {
+      "risk_factor": 0.0
+    },
+    "safer": {
+      "risk_factor": 1.0
+    },
+    "paranoid": {
+      "risk_factor": 2.0
+    }
+  }
+}
