@@ -66,7 +66,7 @@ This codebase uses typing.* imports (Dict, List, etc.) for compatibility with:
 
 ## Dependencies
 
-- FastAPI 0.68-0.99.x
+- FastAPI 0.109.x (patched for security)
 - Uvicorn 0.15-0.23.x
 - Pydantic 1.10.x (v1, not v2)
 - httpx 0.23.x
