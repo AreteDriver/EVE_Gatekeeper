@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 from fastapi import APIRouter, HTTPException
 
 from ..services.data_loader import load_universe, get_neighbors
@@ -38,7 +38,7 @@ def system_neighbors(system_name: str) -> List[str]:
         raise HTTPException(status_code=404, detail="System not found")
 
     neighbors = get_neighbors(system_name)
-    names: set[str] = set()
+    names: Set[str] = set()
     for gate in neighbors:
         if gate.from_system == system_name:
             names.add(gate.to_system)
