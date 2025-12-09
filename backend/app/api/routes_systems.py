@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, HTTPException
 
 from ..services.data_loader import load_universe, get_neighbors
@@ -8,8 +9,8 @@ from ..models.risk import RiskReport
 router = APIRouter()
 
 
-@router.get("/", response_model=list[SystemSummary])
-def list_systems() -> list[SystemSummary]:
+@router.get("/", response_model=List[SystemSummary])
+def list_systems() -> List[SystemSummary]:
     universe = load_universe()
     return [
         SystemSummary(
@@ -30,8 +31,8 @@ async def get_system_risk(system_name: str) -> RiskReport:
     return compute_risk(system_name)
 
 
-@router.get("/{system_name}/neighbors", response_model=list[str])
-def system_neighbors(system_name: str) -> list[str]:
+@router.get("/{system_name}/neighbors", response_model=List[str])
+def system_neighbors(system_name: str) -> List[str]:
     universe = load_universe()
     if system_name not in universe.systems:
         raise HTTPException(status_code=404, detail="System not found")

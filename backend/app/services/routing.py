@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional, Set
 import math
 
 from .data_loader import load_universe, load_risk_config
@@ -23,8 +23,8 @@ def _dijkstra(graph: Dict[str, Dict[str, float]], start: str, end: str, profile:
     risk_factor = profile_cfg.get("risk_factor", 0.0)
 
     dist: Dict[str, float] = {node: math.inf for node in graph}
-    prev: Dict[str, str | None] = {node: None for node in graph}
-    visited: set[str] = set()
+    prev: Dict[str, Optional[str]] = {node: None for node in graph}
+    visited: Set[str] = set()
 
     dist[start] = 0.0
 
@@ -49,11 +49,11 @@ def _dijkstra(graph: Dict[str, Dict[str, float]], start: str, end: str, profile:
     if dist[end] == math.inf:
         return [], math.inf
 
-    node = end
+    node: Optional[str] = end
     path: List[str] = []
     while node is not None:
         path.append(node)
-        node = prev[node]  # type: ignore
+        node = prev[node]
     path.reverse()
     return path, dist[end]
 
