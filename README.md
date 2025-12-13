@@ -40,11 +40,22 @@ The map visualization shows systems color-coded by security status:
 - 🔴 **Red**: Null-security systems (-1.0 to 0.0)
 - 🟣 **Purple**: Wormhole space
 
+![EVE Online Map - Security Status](assets/map_security_status.png)
+
+### High-Sec System Filtering
+Filter and view only high-security systems for safer route planning:
+
+![High-Sec Systems Only](assets/map_high_sec.png)
+
 ### Route Planning
 Calculate optimal routes between systems with different safety profiles:
 - **Shortest**: Minimum jumps, ignoring risk
 - **Safer**: Balanced risk vs distance
 - **Paranoid**: Maximum safety, avoiding dangerous systems
+
+The green highlighted path shows a planned route from high-sec (Jita) to null-sec space, demonstrating route visualization capabilities.
+
+![Planned Route Visualization](assets/map_route_planned.png)
 
 ## 🚀 Quick Start
 
