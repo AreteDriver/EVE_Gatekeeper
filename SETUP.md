@@ -331,10 +331,16 @@ uvicorn app.main:app --port 8080
 
 #### Issue: Permission denied when activating virtual environment on Windows
 
-**Solution**: Change PowerShell execution policy:
+**Solution**: Change PowerShell execution policy temporarily for the current session (recommended):
 ```powershell
+# For current session only (safest option)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+
+# OR for current user (persists across sessions)
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
+
+**Note**: The `-Scope Process` option only affects the current PowerShell session and is the safest approach. After closing PowerShell, the policy reverts to default.
 
 ### Python Version Issues
 
