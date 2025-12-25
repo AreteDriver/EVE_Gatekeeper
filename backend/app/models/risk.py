@@ -1,14 +1,13 @@
-from typing import Dict
 from pydantic import BaseModel
 
 
 class RiskConfig(BaseModel):
-    security_category_weights: Dict[str, float]
-    kill_weights: Dict[str, float]
-    clamp: Dict[str, int]
-    risk_colors: Dict[str, str]
-    map_layers: Dict[str, bool]
-    routing_profiles: Dict[str, Dict[str, float]]
+    security_category_weights: dict[str, float]
+    kill_weights: dict[str, float]
+    clamp: dict[str, int]
+    risk_colors: dict[str, str]
+    map_layers: dict[str, bool]
+    routing_profiles: dict[str, dict[str, float]]
 
 
 class ZKillStats(BaseModel):

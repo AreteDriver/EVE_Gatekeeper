@@ -1,10 +1,8 @@
-from typing import Optional
-
 from .data_loader import load_risk_config, load_universe
 from ..models.risk import ZKillStats, RiskReport, RiskBreakdown
 
 
-def compute_risk(system_name: str, stats: Optional[ZKillStats] = None) -> RiskReport:
+def compute_risk(system_name: str, stats: ZKillStats | None = None) -> RiskReport:
     cfg = load_risk_config()
     universe = load_universe()
 
