@@ -1,135 +1,154 @@
-# Arete EVE Navigator — MVP
+# EVE Gatekeeper
 
-Goal: Build a **modern 2D EVE Online map** with **risk-aware routing** using:
-- CCP universe data (later)
-- zKillboard activity (later, stub first)
-- JSON-driven configuration for risk scoring and map behavior
+**Comprehensive EVE Online navigation, routing, and intel visualization platform.**
 
-This project starts as a **FastAPI backend** that:
-- Serves universe + map config for a frontend (web / Flutter)
-- Computes a simple **risk score per system**
-- Computes **routes** between systems using Dijkstra, with optional risk weighting
-- Exposes clean JSON APIs the frontend can consume
+A unified toolkit combining real-time map visualization, risk-aware routing, capital jump planning, and universe data management. Built with FastAPI backend and matplotlib visualization.
 
-Later we will:
-- Integrate real ESI / zKill APIs
-- Add more layers (WH connections, alliance borders, ESS, etc.)
-- Add AI helpers (route advice, danger warnings, etc.)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
----
+## Features
 
-## Tech Stack (backend MVP)
+### Starmap & Navigation
+- **2D Universe Visualization**: Interactive map with zoom, pan, and filtering
+- **Risk-Aware Routing**: Dijkstra pathfinding with safety profiles (shortest/safer/paranoid)
+- **Capital Jump Planner**: Jump range visualization and multi-leg route planning
+- **Security Overlays**: High-sec, low-sec, null-sec, wormhole filtering
 
-- Python 3.11+
-- FastAPI
-- Uvicorn
-- Pydantic
-- httpx (for zKill integration, stub for now)
+### Live Data Integration
+- **ESI API Client**: Full EVE Swagger Interface integration with caching
+- **zKillboard Integration**: Real-time kill data for risk assessment
+- **Sovereignty Heatmaps**: Territory control visualization
+- **Activity Metrics**: Kills, jumps, and player activity overlays
 
-JSON-driven configuration:
-- `universe.json` — systems, gates, positions
-- `risk_config.json` — risk weights, routing profiles, map layer toggles, color scale
+### Backend Services
+- **FastAPI REST API**: Full OpenAPI documentation
+- **SQLite Universe Database**: Offline-first with SDE ingestion
+- **LRU Caching**: Optimized performance for repeated queries
+- **WebSocket Support**: Real-time updates (planned)
 
----
+## Quick Start
+
+### Installation
+
+```bash
+git clone https://github.com/AreteDriver/EVE_Gatekeeper.git
+cd EVE_Gatekeeper
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Initialize Universe Data
+
+```bash
+# Ingest universe data from ESI
+python -m backend.starmap.ingest_sde --reset
+```
+
+### Run the Server
+
+```bash
+uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+API docs: http://localhost:8000/docs
 
 ## Project Structure
 
-```text
-arete-eve-navigator/
-  backend/
-    app/
-      __init__.py
-      main.py
-      core/
-        __init__.py
-        config.py
-      api/
-        __init__.py
-        routes_systems.py
-        routes_map.py
-      models/
-        __init__.py
-        system.py
-        risk.py
-        route.py
-      services/
-        __init__.py
-        data_loader.py
-        risk_engine.py
-        routing.py
-        zkill_client.py
-      data/
-        universe.json
-        risk_config.json
-    requirements.txt
+```
+EVE_Gatekeeper/
+├── backend/
+│   ├── app/                    # FastAPI application
+│   │   ├── services/           # Risk engine, routing, data loader
+│   │   └── main.py
+│   └── starmap/                # Universe navigation
+│       ├── esi/                # ESI client with caching
+│       ├── graph/              # Pathfinding algorithms
+│       ├── sde/                # SQLite schema and models
+│       ├── jump_planner/       # Capital ship routing
+│       ├── ingest_sde.py       # Universe data ingestion
+│       └── refresh_cache.py    # Live data refresh
+├── src/evemap/                 # Map visualization library
+│   ├── esi_client.py
+│   ├── map.py
+│   └── models.py
+├── examples/                   # Usage examples
+└── docs/
 ```
 
----
+## API Endpoints
 
-## Core Concepts for Copilot
+### Systems
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/systems/` | GET | List all systems |
+| `/systems/{name}/risk` | GET | Get risk report |
+| `/systems/{name}/neighbors` | GET | Get connected systems |
 
-1. **Universe model**
-   - Systems: name, id, region_id, security, category, position(x,y)
-   - Gates: from, to, distance
-   - Use Pydantic models for validation.
-   - Load from universe.json into an in-memory structure (cached).
+### Routing
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/map/route` | GET | Calculate route with risk weighting |
+| `/api/v1/route` | POST | Advanced route calculation |
 
-2. **Risk model**
-   - RiskConfig: security weights, kill weights, clamp, risk_colors, map_layers, routing_profiles.
-   - ZKillStats: recent_kills, recent_pods.
-   - RiskReport: score + breakdown.
-   - Risk is computed from:
-     - security category
-     - recent kills
-     - recent pods
-   - Color is picked from risk_colors based on the score band.
+### Jump Planning
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/jump/range` | POST | Get systems in jump range |
+| `/api/v1/jump/route` | POST | Plan capital jump route |
 
-3. **Routing**
-   - Build adjacency graph from gates.
-   - Implement Dijkstra.
-   - Cost = base distance * (1 + risk_factor * (risk_score / 100)).
-   - Profiles:
-     - "shortest" -> risk_factor 0.0
-     - "safer" -> 1.0
-     - "paranoid" -> 2.0
+### Heatmaps
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/map/config` | GET | Get map with risk scores |
+| `/api/v1/heatmap` | POST | Get activity heatmap |
 
-4. **APIs (initial)**
-   - GET /systems -> list of systems (name, security, category, region_id).
-   - GET /systems/{system_name}/risk -> RiskReport.
-   - GET /systems/{system_name}/neighbors -> list of neighbor system names.
-   - GET /map/config -> universe + risk_color + risk_score + map_layers.
-   - GET /map/route?from=Jita&to=Niarja&profile=safer -> RouteResponse.
+## Capital Ships Supported
 
-5. **zKill integration**
-   - For MVP, stub zkill_client.fetch_system_stats(system_id) to return zero activity.
-   - Later, Copilot can help implement real HTTP calls to zKillboard and aggregation.
+- **Dreadnoughts**: Revelation, Moros, Naglfar, Phoenix
+- **Carriers**: Archon, Thanatos, Nidhoggur, Chimera
+- **Force Auxiliaries**: Apostle, Ninazu, Lif, Minokawa
+- **Supercarriers**: Aeon, Nyx, Hel, Wyvern
+- **Titans**: Avatar, Erebus, Ragnarok, Leviathan
+- **Jump Freighters**: Ark, Anshar, Nomad, Rhea
+- **Black Ops**: Sin, Widow, Panther, Redeemer
 
----
+## Route Profiles
 
-## How to Run (backend)
+| Profile | Description | Use Case |
+|---------|-------------|----------|
+| `shortest` | Minimum jumps | Speed over safety |
+| `safer` | Balanced risk/distance | General travel |
+| `paranoid` | Maximum safety | Expensive cargo |
+
+## Development
 
 ```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-pip install -r requirements.txt
+# Run tests
+pytest
 
-uvicorn app.main:app --reload
+# Type checking
+mypy backend/
+
+# Linting
+ruff check .
 ```
 
-Then open:
-- http://localhost:8000/docs for Swagger UI
-- http://localhost:8000/map/config for map data
-- http://localhost:8000/map/route?from=Jita&to=Niarja&profile=safer for a sample route
+## License
+
+MIT License - see [LICENSE](LICENSE)
+
+## Acknowledgments
+
+- **CCP Games** for EVE Online and ESI API
+- **zKillboard** for kill data
+- **EVE SDE** for universe data
 
 ---
 
-## Copilot Tasks
-
-Copilot, please help with:
-1. Expanding the universe by loading real EVE map data later.
-2. Implementing real zKillboard integration in zkill_client.py.
-3. Improving risk scoring formulas in risk_engine.py.
-4. Adding filters to /systems (region, security band, risk threshold).
-5. Creating tests for routing and risk scoring.
-6. Suggesting a simple frontend (React / Svelte / Flutter) that consumes /map/config and /map/route and renders a 2D map with risk-based colors.
+**Built for the EVE Online community** | [Report Issues](https://github.com/AreteDriver/EVE_Gatekeeper/issues)
