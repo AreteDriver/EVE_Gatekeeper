@@ -18,37 +18,5 @@ env/
 *.swo
 *~
 .DS_Store
-
-# Jupyter Notebook
-.ipynb_checkpoints/
-*.ipynb
-
-# ML models and data
-*.h5
-*.pkl
-*.pth
-*.onnx
-*.pt
-models/
-data/cache/
-*.wav
-*.mp3
-*.flac
-*.ogg
-
-# Test outputs
-.pytest_cache/
-.coverage
-htmlcov/
-*.log
-
-# Distribution
-dist/
-build/
-*.egg-info/
-.eggs/
-
-# Temporary files
-*.tmp
-tmp/
-temp/
+backend/.venv/
+venv/

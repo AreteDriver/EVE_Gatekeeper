@@ -1,124 +1,154 @@
-# AI Guitar Tabs
+# EVE Gatekeeper
 
-An AI-powered guitar tablature generation and transcription tool that converts audio recordings into accurate guitar tabs using machine learning.
+**Comprehensive EVE Online navigation, routing, and intel visualization platform.**
+
+A unified toolkit combining real-time map visualization, risk-aware routing, capital jump planning, and universe data management. Built with FastAPI backend and matplotlib visualization.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
 ## Features
 
-- **Audio to Tab Conversion**: Automatically transcribe guitar audio into tablature notation
-- **Multi-format Support**: Process various audio formats (WAV, MP3, FLAC, OGG)
-- **AI-Powered Analysis**: Uses deep learning models for pitch detection and note recognition
-- **Tab Formatting**: Export tabs in multiple formats (ASCII, Guitar Pro, MusicXML)
-- **Chord Detection**: Automatically identify and label chords
-- **Rhythm Analysis**: Detect tempo, time signatures, and note durations
+### Starmap & Navigation
+- **2D Universe Visualization**: Interactive map with zoom, pan, and filtering
+- **Risk-Aware Routing**: Dijkstra pathfinding with safety profiles (shortest/safer/paranoid)
+- **Capital Jump Planner**: Jump range visualization and multi-leg route planning
+- **Security Overlays**: High-sec, low-sec, null-sec, wormhole filtering
 
-## Installation
+### Live Data Integration
+- **ESI API Client**: Full EVE Swagger Interface integration with caching
+- **zKillboard Integration**: Real-time kill data for risk assessment
+- **Sovereignty Heatmaps**: Territory control visualization
+- **Activity Metrics**: Kills, jumps, and player activity overlays
+
+### Backend Services
+- **FastAPI REST API**: Full OpenAPI documentation
+- **SQLite Universe Database**: Offline-first with SDE ingestion
+- **LRU Caching**: Optimized performance for repeated queries
+- **WebSocket Support**: Real-time updates (planned)
+
+## Quick Start
+
+### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/AreteDriver/evemap.git
-cd evemap
+git clone https://github.com/AreteDriver/EVE_Gatekeeper.git
+cd EVE_Gatekeeper
 
 # Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+python -m venv venv
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-## Quick Start
+### Initialize Universe Data
 
-```python
-from src.aiguitartabs import AudioProcessor, TabGenerator
-
-# Load and process audio file
-processor = AudioProcessor("path/to/guitar_audio.wav")
-audio_data = processor.load()
-
-# Generate tablature
-tab_generator = TabGenerator()
-tablature = tab_generator.generate(audio_data)
-
-# Export to file
-tablature.export("output.txt", format="ascii")
+```bash
+# Ingest universe data from ESI
+python -m backend.starmap.ingest_sde --reset
 ```
 
-## Usage Examples
+### Run the Server
 
-See the `examples/` directory for more detailed usage examples:
+```bash
+uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-- `basic_transcription.py` - Simple audio to tab conversion
-- `batch_processing.py` - Process multiple files at once
-- `chord_detection.py` - Focus on chord identification
-- `custom_tuning.py` - Work with alternate tunings
+API docs: http://localhost:8000/docs
 
 ## Project Structure
 
 ```
-evemap/
-├── src/
-│   └── aiguitartabs/
-│       ├── __init__.py
-│       ├── audio_processor.py    # Audio loading and preprocessing
-│       ├── pitch_detector.py     # Pitch detection algorithms
-│       ├── tab_generator.py      # Tab generation engine
-│       ├── chord_detector.py     # Chord recognition
-│       └── exporters.py          # Tab export formats
-├── tests/
-│   ├── test_audio_processor.py
-│   ├── test_pitch_detector.py
-│   └── test_tab_generator.py
-├── examples/
-│   └── basic_transcription.py
-├── docs/
-│   ├── getting_started.md
-│   └── api_reference.md
-├── requirements.txt
-├── LICENSE
-└── README.md
+EVE_Gatekeeper/
+├── backend/
+│   ├── app/                    # FastAPI application
+│   │   ├── services/           # Risk engine, routing, data loader
+│   │   └── main.py
+│   └── starmap/                # Universe navigation
+│       ├── esi/                # ESI client with caching
+│       ├── graph/              # Pathfinding algorithms
+│       ├── sde/                # SQLite schema and models
+│       ├── jump_planner/       # Capital ship routing
+│       ├── ingest_sde.py       # Universe data ingestion
+│       └── refresh_cache.py    # Live data refresh
+├── src/evemap/                 # Map visualization library
+│   ├── esi_client.py
+│   ├── map.py
+│   └── models.py
+├── examples/                   # Usage examples
+└── docs/
 ```
 
-## Requirements
+## API Endpoints
 
-- Python 3.8+
-- NumPy
-- SciPy
-- librosa (audio processing)
-- TensorFlow or PyTorch (ML models)
-- pretty_midi (MIDI processing)
+### Systems
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/systems/` | GET | List all systems |
+| `/systems/{name}/risk` | GET | Get risk report |
+| `/systems/{name}/neighbors` | GET | Get connected systems |
 
-## How It Works
+### Routing
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/map/route` | GET | Calculate route with risk weighting |
+| `/api/v1/route` | POST | Advanced route calculation |
 
-1. **Audio Preprocessing**: Load audio file and convert to mono, normalize amplitude
-2. **Pitch Detection**: Use advanced algorithms (CREPE, pYIN) to detect fundamental frequencies
-3. **Note Segmentation**: Identify note onsets and offsets
-4. **Tab Mapping**: Map detected pitches to guitar fretboard positions
-5. **Optimization**: Choose optimal fingering patterns
-6. **Formatting**: Generate clean, readable tablature
+### Jump Planning
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/jump/range` | POST | Get systems in jump range |
+| `/api/v1/jump/route` | POST | Plan capital jump route |
 
-## Contributing
+### Heatmaps
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/map/config` | GET | Get map with risk scores |
+| `/api/v1/heatmap` | POST | Get activity heatmap |
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+## Capital Ships Supported
+
+- **Dreadnoughts**: Revelation, Moros, Naglfar, Phoenix
+- **Carriers**: Archon, Thanatos, Nidhoggur, Chimera
+- **Force Auxiliaries**: Apostle, Ninazu, Lif, Minokawa
+- **Supercarriers**: Aeon, Nyx, Hel, Wyvern
+- **Titans**: Avatar, Erebus, Ragnarok, Leviathan
+- **Jump Freighters**: Ark, Anshar, Nomad, Rhea
+- **Black Ops**: Sin, Widow, Panther, Redeemer
+
+## Route Profiles
+
+| Profile | Description | Use Case |
+|---------|-------------|----------|
+| `shortest` | Minimum jumps | Speed over safety |
+| `safer` | Balanced risk/distance | General travel |
+| `paranoid` | Maximum safety | Expensive cargo |
+
+## Development
+
+```bash
+# Run tests
+pytest
+
+# Type checking
+mypy backend/
+
+# Linting
+ruff check .
+```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE)
 
 ## Acknowledgments
 
-- Built with [librosa](https://librosa.org/) for audio analysis
-- Inspired by research in music information retrieval (MIR)
-- Uses state-of-the-art pitch detection algorithms
+- **CCP Games** for EVE Online and ESI API
+- **zKillboard** for kill data
+- **EVE SDE** for universe data
 
-## Roadmap
+---
 
-- [ ] Support for bass guitar (4-string, 5-string)
-- [ ] Real-time transcription from audio input
-- [ ] Web interface for easy access
-- [ ] Mobile app for on-the-go transcription
-- [ ] Support for multiple instruments
-- [ ] Integration with popular DAWs
-
-## Support
-
-For issues, questions, or suggestions, please open an issue on GitHub.
+**Built for the EVE Online community** | [Report Issues](https://github.com/AreteDriver/EVE_Gatekeeper/issues)
