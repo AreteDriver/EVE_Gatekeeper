@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # EVE Gatekeeper API
+  # ==========================================================================
+  eve-gatekeeper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eve-gatekeeper
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./eve_gatekeeper.db
+      - POSTGRES_URL=postgresql://gatekeeper:gatekeeper@postgres:5432/eve_gatekeeper
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=json
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - gatekeeper-network
+    volumes:
+      - gatekeeper-data:/app/data
+
+  # ==========================================================================
+  # PostgreSQL Database
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: eve-gatekeeper-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=gatekeeper
+      - POSTGRES_PASSWORD=gatekeeper
+      - POSTGRES_DB=eve_gatekeeper
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gatekeeper -d eve_gatekeeper"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - gatekeeper-network
+
+  # ==========================================================================
+  # Redis Cache
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: eve-gatekeeper-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - gatekeeper-network
+
+networks:
+  gatekeeper-network:
+    driver: bridge
+
+volumes:
+  gatekeeper-data:
+  postgres-data:
+  redis-data:

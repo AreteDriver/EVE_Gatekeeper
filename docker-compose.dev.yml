@@ -1,0 +1,30 @@
+version: '3.8'
+
+# Development overrides - use with:
+# docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  eve-gatekeeper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    volumes:
+      # Mount source code for hot reload
+      - ./backend:/app/backend:ro
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - LOG_FORMAT=console
+    command: ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    # Disable health check in dev for faster startup
+    healthcheck:
+      disable: true
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
