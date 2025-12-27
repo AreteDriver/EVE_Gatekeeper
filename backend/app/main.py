@@ -92,6 +92,24 @@ async def startup_event():
     _startup_time = datetime.now(timezone.utc)
     set_start_time(_startup_time)
 
+    # Start zKillboard listener for real-time kill feed
+    from .services.zkill_listener import get_zkill_listener
+    listener = get_zkill_listener()
+    await listener.start()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on application shutdown."""
+    # Stop zKillboard listener
+    from .services.zkill_listener import get_zkill_listener
+    listener = get_zkill_listener()
+    await listener.stop()
+
+    # Close database connections
+    from .db.database import close_db
+    await close_db()
+
 
 @app.get("/health", tags=["health"])
 async def health_check() -> Dict[str, Any]:
