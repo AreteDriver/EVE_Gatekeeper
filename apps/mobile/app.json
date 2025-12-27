@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "EVE Gatekeeper",
+    "slug": "eve-gatekeeper",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "scheme": "evegatekeeper",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.evegatekeeper.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.evegatekeeper.mobile",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-web-browser"
+    ],
+    "extra": {
+      "GATEKEEPER_URL": "http://localhost:8000",
+      "ESI_CLIENT_ID": "",
+      "ESI_CALLBACK_URL": "evegatekeeper://auth"
+    }
+  }
+}
