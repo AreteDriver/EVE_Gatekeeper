@@ -1,0 +1,88 @@
+"""Systems API v1 endpoints."""
+
+from typing import List
+
+from fastapi import APIRouter, HTTPException
+
+from ...services.data_loader import load_universe, get_neighbors
+from ...services.risk_engine import compute_risk
+from ...models.system import SystemSummary
+from ...models.risk import RiskReport
+
+router = APIRouter()
+
+
+@router.get(
+    "/",
+    response_model=List[SystemSummary],
+    summary="List all systems",
+    description="Returns a list of all systems in the EVE universe with basic information.",
+)
+def list_systems() -> List[SystemSummary]:
+    """Get all systems in the universe."""
+    universe = load_universe()
+    return [
+        SystemSummary(
+            name=sys.name,
+            security=sys.security,
+            category=sys.category,
+            region_id=sys.region_id,
+        )
+        for sys in universe.systems.values()
+    ]
+
+
+@router.get(
+    "/{system_name}",
+    response_model=SystemSummary,
+    summary="Get system details",
+    description="Returns details for a specific system.",
+)
+def get_system(system_name: str) -> SystemSummary:
+    """Get details for a specific system."""
+    universe = load_universe()
+    if system_name not in universe.systems:
+        raise HTTPException(status_code=404, detail=f"System '{system_name}' not found")
+    sys = universe.systems[system_name]
+    return SystemSummary(
+        name=sys.name,
+        security=sys.security,
+        category=sys.category,
+        region_id=sys.region_id,
+    )
+
+
+@router.get(
+    "/{system_name}/risk",
+    response_model=RiskReport,
+    summary="Get system risk report",
+    description="Returns a risk assessment for the specified system based on recent activity.",
+)
+async def get_system_risk(system_name: str) -> RiskReport:
+    """Get risk assessment for a system."""
+    universe = load_universe()
+    if system_name not in universe.systems:
+        raise HTTPException(status_code=404, detail=f"System '{system_name}' not found")
+    return compute_risk(system_name)
+
+
+@router.get(
+    "/{system_name}/neighbors",
+    response_model=List[str],
+    summary="Get neighboring systems",
+    description="Returns a list of systems directly connected via stargates.",
+)
+def get_system_neighbors(system_name: str) -> List[str]:
+    """Get systems connected to the specified system."""
+    universe = load_universe()
+    if system_name not in universe.systems:
+        raise HTTPException(status_code=404, detail=f"System '{system_name}' not found")
+
+    neighbors = get_neighbors(system_name)
+    names: set[str] = set()
+    for gate in neighbors:
+        if gate.from_system == system_name:
+            names.add(gate.to_system)
+        else:
+            names.add(gate.from_system)
+    return sorted(names)

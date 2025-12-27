@@ -1,3 +1,5 @@
+"""EVE Gatekeeper API - Main Application."""
+
 from datetime import datetime, timezone
 from typing import Dict, Any
 
@@ -7,6 +9,14 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 from .core.config import settings
 from .api import routes_systems, routes_map
+from .api.v1 import router as v1_router
+from .api.v1.status import set_start_time
+from .middleware import (
+    setup_rate_limiting,
+    SecurityHeadersMiddleware,
+    RequestContextMiddleware,
+)
+from .middleware.security import RequestSizeLimitMiddleware
 
 
 def create_app() -> FastAPI:
@@ -18,23 +28,53 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
+        openapi_tags=[
+            {"name": "health", "description": "Health check endpoints"},
+            {"name": "systems", "description": "System information and risk data"},
+            {"name": "routing", "description": "Route calculation and map configuration"},
+            {"name": "status", "description": "API status and diagnostics"},
+        ],
     )
 
-    # Add CORS middleware
+    # ==========================================================================
+    # Middleware (order matters - first added = outermost)
+    # ==========================================================================
+
+    # Request size limit (10MB)
+    app.add_middleware(RequestSizeLimitMiddleware, max_size=10 * 1024 * 1024)
+
+    # Security headers
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    # Request context (request ID, timing)
+    app.add_middleware(RequestContextMiddleware)
+
+    # CORS
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.CORS_ORIGINS,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["X-Request-ID", "X-Response-Time"],
     )
 
-    # Add GZip compression for responses > 1KB
+    # GZip compression for responses > 1KB
     app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-    # Include routers
+    # Rate limiting
+    setup_rate_limiting(app)
+
+    # ==========================================================================
+    # Routers
+    # ==========================================================================
+
+    # API v1 routes (new versioned API)
+    app.include_router(v1_router)
+
+    # Legacy routes (for backward compatibility)
     app.include_router(routes_systems.router, prefix="/systems", tags=["systems"])
-    app.include_router(routes_map.router, prefix="/map", tags=["map"])
+    app.include_router(routes_map.router, prefix="/map", tags=["routing"])
 
     return app
 
@@ -50,6 +90,7 @@ async def startup_event():
     """Initialize application on startup."""
     global _startup_time
     _startup_time = datetime.now(timezone.utc)
+    set_start_time(_startup_time)
 
 
 @app.get("/health", tags=["health"])
@@ -57,8 +98,7 @@ async def health_check() -> Dict[str, Any]:
     """
     Health check endpoint for container orchestration.
 
-    Returns:
-        Health status including version and uptime.
+    Returns basic health status. For detailed status, use /api/v1/status.
     """
     uptime = (datetime.now(timezone.utc) - _startup_time).total_seconds()
     return {
@@ -77,4 +117,6 @@ async def root() -> Dict[str, str]:
         "version": settings.API_VERSION,
         "docs": "/docs",
         "health": "/health",
+        "api": "/api/v1",
+        "status": "/api/v1/status",
     }

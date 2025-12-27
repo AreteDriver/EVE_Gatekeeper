@@ -1,0 +1,97 @@
+"""Status API v1 endpoints."""
+
+from datetime import datetime, timezone
+from typing import Dict, Any
+
+from fastapi import APIRouter
+
+from ...core.config import settings
+
+router = APIRouter()
+
+# Track start time for uptime calculation
+_start_time: datetime = datetime.now(timezone.utc)
+
+
+def set_start_time(start: datetime) -> None:
+    """Set the application start time (called from main.py)."""
+    global _start_time
+    _start_time = start
+
+
+@router.get(
+    "/",
+    summary="Get API status",
+    description="Returns detailed status information about the API.",
+)
+async def get_status() -> Dict[str, Any]:
+    """
+    Get detailed API status including version, uptime, and component health.
+
+    This endpoint provides more detail than /health and is intended for
+    monitoring dashboards and admin interfaces.
+    """
+    now = datetime.now(timezone.utc)
+    uptime = (now - _start_time).total_seconds()
+
+    # Check database connectivity
+    database_status = "ok"
+    try:
+        from ...services.data_loader import load_universe
+        universe = load_universe()
+        system_count = len(universe.systems)
+    except Exception:
+        database_status = "error"
+        system_count = 0
+
+    # Check cache status
+    cache_status = "ok"
+    try:
+        if settings.REDIS_URL:
+            # Redis configured but may not be connected yet
+            cache_status = "redis_configured"
+        else:
+            cache_status = "memory"
+    except Exception:
+        cache_status = "error"
+
+    return {
+        "status": "operational",
+        "version": settings.API_VERSION,
+        "name": settings.PROJECT_NAME,
+        "timestamp": now.isoformat(),
+        "uptime_seconds": uptime,
+        "uptime_formatted": format_uptime(uptime),
+        "environment": {
+            "debug": settings.DEBUG,
+            "log_level": settings.LOG_LEVEL,
+        },
+        "checks": {
+            "database": database_status,
+            "cache": cache_status,
+            "systems_loaded": system_count,
+        },
+        "features": {
+            "rate_limiting": settings.RATE_LIMIT_ENABLED,
+            "api_key_auth": settings.API_KEY_ENABLED,
+            "metrics": settings.METRICS_ENABLED,
+        },
+    }
+
+
+def format_uptime(seconds: float) -> str:
+    """Format uptime seconds into a human-readable string."""
+    days, remainder = divmod(int(seconds), 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, secs = divmod(remainder, 60)
+
+    parts = []
+    if days > 0:
+        parts.append(f"{days}d")
+    if hours > 0:
+        parts.append(f"{hours}h")
+    if minutes > 0:
+        parts.append(f"{minutes}m")
+    parts.append(f"{secs}s")
+
+    return " ".join(parts)
