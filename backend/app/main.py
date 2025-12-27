@@ -11,12 +11,17 @@ from .core.config import settings
 from .api import routes_systems, routes_map
 from .api.v1 import router as v1_router
 from .api.v1.status import set_start_time
+from .api.metrics import router as metrics_router
 from .middleware import (
     setup_rate_limiting,
     SecurityHeadersMiddleware,
     RequestContextMiddleware,
 )
 from .middleware.security import RequestSizeLimitMiddleware
+from .logging import configure_logging, LoggingMiddleware
+
+# Configure structured logging
+configure_logging()
 
 
 def create_app() -> FastAPI:
@@ -65,9 +70,15 @@ def create_app() -> FastAPI:
     # Rate limiting
     setup_rate_limiting(app)
 
+    # Logging context middleware
+    app.add_middleware(LoggingMiddleware)
+
     # ==========================================================================
     # Routers
     # ==========================================================================
+
+    # Metrics endpoint (at root level)
+    app.include_router(metrics_router)
 
     # API v1 routes (new versioned API)
     app.include_router(v1_router)
@@ -116,14 +127,50 @@ async def health_check() -> Dict[str, Any]:
     """
     Health check endpoint for container orchestration.
 
-    Returns basic health status. For detailed status, use /api/v1/status.
+    Returns health status with component checks.
     """
     uptime = (datetime.now(timezone.utc) - _startup_time).total_seconds()
+
+    # Check database connectivity
+    database_status = "ok"
+    try:
+        from .services.data_loader import load_universe
+        universe = load_universe()
+        if not universe.systems:
+            database_status = "warning"
+    except Exception:
+        database_status = "error"
+
+    # Check cache status
+    cache_status = "memory"
+    if settings.REDIS_URL:
+        try:
+            from .services.cache import get_cache_sync
+            cache = get_cache_sync()
+            cache_status = "redis" if hasattr(cache, "_redis") else "memory"
+        except Exception:
+            cache_status = "memory"
+
+    # Check ESI connectivity
+    esi_status = "unknown"
+
+    # Overall status
+    overall_status = "healthy"
+    if database_status == "error":
+        overall_status = "unhealthy"
+    elif database_status == "warning":
+        overall_status = "degraded"
+
     return {
-        "status": "healthy",
+        "status": overall_status,
         "version": settings.API_VERSION,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "uptime_seconds": uptime,
+        "checks": {
+            "database": database_status,
+            "cache": cache_status,
+            "esi": esi_status,
+        },
     }
 
 
