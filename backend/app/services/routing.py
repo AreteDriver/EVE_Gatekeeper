@@ -1,17 +1,36 @@
 import math
+from typing import Set
 
 from .data_loader import load_universe, load_risk_config
 from .risk_engine import compute_risk
 from ..models.route import RouteResponse, RouteHop
 
 
-def _build_graph() -> dict[str, dict[str, float]]:
+def _build_graph(avoid: Set[str] | None = None) -> dict[str, dict[str, float]]:
+    """
+    Build navigation graph from universe data.
+
+    Args:
+        avoid: Set of system names to exclude from the graph
+
+    Returns:
+        Adjacency dict mapping system -> {neighbor -> distance}
+    """
     universe = load_universe()
-    graph: dict[str, dict[str, float]] = {name: {} for name in universe.systems}
+    avoid = avoid or set()
+
+    # Exclude avoided systems from the graph
+    graph: dict[str, dict[str, float]] = {
+        name: {} for name in universe.systems if name not in avoid
+    }
 
     for gate in universe.gates:
-        graph[gate.from_system][gate.to_system] = gate.distance
-        graph[gate.to_system][gate.from_system] = gate.distance
+        # Skip gates involving avoided systems
+        if gate.from_system in avoid or gate.to_system in avoid:
+            continue
+        if gate.from_system in graph and gate.to_system in graph:
+            graph[gate.from_system][gate.to_system] = gate.distance
+            graph[gate.to_system][gate.from_system] = gate.distance
 
     return graph
 
@@ -57,15 +76,37 @@ def _dijkstra(graph: dict[str, dict[str, float]], start: str, end: str, profile:
     return path, dist[end]
 
 
-def compute_route(from_system: str, to_system: str, profile: str = "shortest") -> RouteResponse:
+def compute_route(
+    from_system: str,
+    to_system: str,
+    profile: str = "shortest",
+    avoid: Set[str] | None = None,
+) -> RouteResponse:
+    """
+    Compute a route between two systems.
+
+    Args:
+        from_system: Origin system name
+        to_system: Destination system name
+        profile: Routing profile ('shortest', 'safer', 'paranoid')
+        avoid: Set of system names to avoid in routing
+
+    Returns:
+        RouteResponse with path details
+    """
     universe = load_universe()
-    graph = _build_graph()
+    avoid = avoid or set()
 
     if from_system not in universe.systems:
         raise ValueError(f"Unknown from_system: {from_system}")
     if to_system not in universe.systems:
         raise ValueError(f"Unknown to_system: {to_system}")
+    if from_system in avoid:
+        raise ValueError(f"Cannot avoid origin system: {from_system}")
+    if to_system in avoid:
+        raise ValueError(f"Cannot avoid destination system: {to_system}")
 
+    graph = _build_graph(avoid)
     path_names, total_cost = _dijkstra(graph, from_system, to_system, profile)
     if not path_names:
         raise ValueError("No route found")

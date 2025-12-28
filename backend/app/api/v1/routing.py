@@ -1,6 +1,6 @@
 """Routing API v1 endpoints."""
 
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -25,6 +25,10 @@ def calculate_route(
         "shortest",
         description="Routing profile: 'shortest', 'safer', or 'paranoid'",
     ),
+    avoid: Optional[List[str]] = Query(
+        None,
+        description="Systems to avoid (comma-separated or repeated param)",
+    ),
 ) -> RouteResponse:
     """
     Calculate a route between two systems.
@@ -35,6 +39,7 @@ def calculate_route(
         - `shortest`: Minimum jumps, ignores risk
         - `safer`: Balanced approach, avoids high-risk systems
         - `paranoid`: Maximum safety, avoids all dangerous areas
+    - **avoid**: Systems to exclude from routing (e.g., "Tama,Rancer" or multiple &avoid=Tama&avoid=Rancer)
     """
     cfg = load_risk_config()
     if profile not in cfg.routing_profiles:
@@ -43,8 +48,16 @@ def calculate_route(
             status_code=400,
             detail=f"Unknown routing profile: '{profile}'. Available: {available}",
         )
+
+    # Parse avoid list - handle comma-separated values
+    avoid_set: set[str] = set()
+    if avoid:
+        for item in avoid:
+            # Support comma-separated values in single param
+            avoid_set.update(name.strip() for name in item.split(",") if name.strip())
+
     try:
-        return compute_route(from_system, to_system, profile)
+        return compute_route(from_system, to_system, profile, avoid=avoid_set)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
