@@ -10,6 +10,9 @@ class System(BaseModel):
     name: str
     id: int
     region_id: int
+    region_name: str = ""
+    constellation_id: int = 0
+    constellation_name: str = ""
     security: float
     category: str  # highsec, lowsec, nullsec, wh
     position: Position
@@ -38,3 +41,6 @@ class SystemSummary(BaseModel):
     security: float
     category: str
     region_id: int
+    region_name: str = ""
+    constellation_id: int = 0
+    constellation_name: str = ""

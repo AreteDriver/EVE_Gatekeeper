@@ -27,6 +27,9 @@ def list_systems() -> List[SystemSummary]:
             security=sys.security,
             category=sys.category,
             region_id=sys.region_id,
+            region_name=sys.region_name,
+            constellation_id=sys.constellation_id,
+            constellation_name=sys.constellation_name,
         )
         for sys in universe.systems.values()
     ]
@@ -49,6 +52,9 @@ def get_system(system_name: str) -> SystemSummary:
         security=sys.security,
         category=sys.category,
         region_id=sys.region_id,
+        region_name=sys.region_name,
+        constellation_id=sys.constellation_id,
+        constellation_name=sys.constellation_name,
     )
 
 

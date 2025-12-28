@@ -16,12 +16,22 @@ def get_security_category(security: float) -> str:
         return "nullsec"
 
 def main():
-    # Load regions for reference
+    # Load regions
     regions = {}
     with open("/tmp/mapRegions.csv", "r") as f:
         reader = csv.DictReader(f)
         for row in reader:
             regions[int(row["regionID"])] = row["regionName"]
+
+    # Load constellations
+    constellations = {}
+    with open("/tmp/mapConstellations.csv", "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            constellations[int(row["constellationID"])] = {
+                "name": row["constellationName"],
+                "region_id": int(row["regionID"])
+            }
 
     # Load solar systems
     systems = {}
@@ -30,6 +40,7 @@ def main():
         for row in reader:
             system_id = int(row["solarSystemID"])
             region_id = int(row["regionID"])
+            constellation_id = int(row["constellationID"])
             security = float(row["security"])
 
             # Skip wormhole systems (region IDs 11000000+)
@@ -40,9 +51,17 @@ def main():
             if region_id >= 12000000:
                 continue
 
+            # Get region and constellation names
+            region_name = regions.get(region_id, "Unknown")
+            constellation_data = constellations.get(constellation_id, {})
+            constellation_name = constellation_data.get("name", "Unknown")
+
             systems[row["solarSystemName"]] = {
                 "id": system_id,
                 "region_id": region_id,
+                "region_name": region_name,
+                "constellation_id": constellation_id,
+                "constellation_name": constellation_name,
                 "security": round(security, 2),
                 "category": get_security_category(security),
                 "position": {
