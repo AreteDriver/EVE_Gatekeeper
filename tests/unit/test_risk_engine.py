@@ -16,25 +16,26 @@ class TestComputeRisk:
         assert report.system_name == "Jita"
         assert report.system_id == 30000142
         assert report.category == "highsec"
-        assert report.security == 0.9
+        assert report.security == 0.95  # Real Jita security
         # High-sec with no kills should have low risk
         assert 0 <= report.score <= 100
 
     def test_compute_risk_lowsec_system(self):
         """Test risk calculation for a low-sec system."""
-        report = compute_risk("Niarja")
+        report = compute_risk("Tama")  # Use Tama instead of Niarja (real lowsec)
 
-        assert report.system_name == "Niarja"
+        assert report.system_name == "Tama"
         assert report.category == "lowsec"
-        assert report.security == 0.5
+        assert 0.0 < report.security < 0.5  # Lowsec range
         # Low-sec should have higher base risk than high-sec
         assert report.score > 0
 
     def test_compute_risk_with_kill_stats(self):
         """Test risk calculation with kill statistics."""
-        stats = ZKillStats(recent_kills=100, recent_pods=50)
-        report_with_kills = compute_risk("Jita", stats=stats)
-        report_no_kills = compute_risk("Jita")
+        stats_high = ZKillStats(recent_kills=500, recent_pods=100)
+        stats_low = ZKillStats(recent_kills=0, recent_pods=0)
+        report_with_kills = compute_risk("Jita", stats=stats_high)
+        report_no_kills = compute_risk("Jita", stats=stats_low)
 
         # Risk should be higher with kills
         assert report_with_kills.score > report_no_kills.score
@@ -57,7 +58,7 @@ class TestComputeRisk:
         """Test that risk score is clamped between 0 and 100."""
         # Even with extreme kill stats, should not exceed 100
         extreme_stats = ZKillStats(recent_kills=10000, recent_pods=5000)
-        report = compute_risk("Niarja", stats=extreme_stats)
+        report = compute_risk("Tama", stats=extreme_stats)
 
         assert 0 <= report.score <= 100
 

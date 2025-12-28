@@ -19,7 +19,7 @@ class TestRouteEndpoint:
 
     def test_calculate_route_multi_hop(self, test_client):
         """Test calculating a multi-hop route."""
-        response = test_client.get("/api/v1/route/?from=Jita&to=Niarja&profile=shortest")
+        response = test_client.get("/api/v1/route/?from=Jita&to=Urlen&profile=shortest")
         assert response.status_code == 200
 
         data = response.json()
@@ -28,7 +28,7 @@ class TestRouteEndpoint:
 
     def test_calculate_route_path_structure(self, test_client):
         """Test that route path has proper structure."""
-        response = test_client.get("/api/v1/route/?from=Jita&to=Niarja&profile=shortest")
+        response = test_client.get("/api/v1/route/?from=Jita&to=Urlen&profile=shortest")
         data = response.json()
 
         for hop in data["path"]:
@@ -39,9 +39,9 @@ class TestRouteEndpoint:
 
     def test_calculate_route_different_profiles(self, test_client):
         """Test calculating routes with different profiles."""
-        shortest = test_client.get("/api/v1/route/?from=Jita&to=Niarja&profile=shortest").json()
-        safer = test_client.get("/api/v1/route/?from=Jita&to=Niarja&profile=safer").json()
-        paranoid = test_client.get("/api/v1/route/?from=Jita&to=Niarja&profile=paranoid").json()
+        shortest = test_client.get("/api/v1/route/?from=Jita&to=Urlen&profile=shortest").json()
+        safer = test_client.get("/api/v1/route/?from=Jita&to=Urlen&profile=safer").json()
+        paranoid = test_client.get("/api/v1/route/?from=Jita&to=Urlen&profile=paranoid").json()
 
         # All should complete successfully
         assert shortest["total_jumps"] >= 1

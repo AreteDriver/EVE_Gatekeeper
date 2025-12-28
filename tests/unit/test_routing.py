@@ -18,12 +18,12 @@ class TestBuildGraph:
         assert "Jita" in graph["Perimeter"]
 
     def test_build_graph_includes_all_systems(self):
-        """Test that graph includes all systems."""
+        """Test that graph includes key systems."""
         graph = _build_graph()
 
         assert "Jita" in graph
         assert "Perimeter" in graph
-        assert "Niarja" in graph
+        assert "Amarr" in graph
 
 
 class TestDijkstra:
@@ -40,10 +40,10 @@ class TestDijkstra:
     def test_dijkstra_finds_multi_hop_path(self):
         """Test finding a multi-hop path."""
         graph = _build_graph()
-        path, cost = _dijkstra(graph, "Jita", "Niarja", "shortest")
+        path, cost = _dijkstra(graph, "Jita", "Urlen", "shortest")
 
-        assert path == ["Jita", "Perimeter", "Niarja"]
-        assert cost == 4.0  # 1 + 3
+        assert path == ["Jita", "Perimeter", "Urlen"]
+        assert cost == 2.0  # 1 + 1
 
     def test_dijkstra_same_start_end(self):
         """Test path when start equals end."""
@@ -69,7 +69,7 @@ class TestComputeRoute:
 
     def test_compute_route_path_details(self):
         """Test that route path contains proper hop details."""
-        response = compute_route("Jita", "Niarja", "shortest")
+        response = compute_route("Jita", "Urlen", "shortest")
 
         assert len(response.path) == 3
 
@@ -78,12 +78,12 @@ class TestComputeRoute:
         assert response.path[0].cumulative_jumps == 0
 
         # Last hop
-        assert response.path[2].system_name == "Niarja"
+        assert response.path[2].system_name == "Urlen"
         assert response.path[2].cumulative_jumps == 2
 
     def test_compute_route_risk_stats(self):
         """Test that route includes risk statistics."""
-        response = compute_route("Jita", "Niarja", "shortest")
+        response = compute_route("Jita", "Urlen", "shortest")
 
         assert response.max_risk >= 0
         assert response.avg_risk >= 0
@@ -101,8 +101,8 @@ class TestComputeRoute:
 
     def test_compute_route_different_profiles(self):
         """Test that different profiles may produce different costs."""
-        shortest = compute_route("Jita", "Niarja", "shortest")
-        safer = compute_route("Jita", "Niarja", "safer")
+        shortest = compute_route("Jita", "Urlen", "shortest")
+        safer = compute_route("Jita", "Urlen", "safer")
 
         # Both should find a valid route
         assert shortest.total_jumps >= 1
@@ -113,7 +113,7 @@ class TestComputeRoute:
 
     def test_compute_route_cumulative_cost(self):
         """Test that cumulative cost increases along the path."""
-        response = compute_route("Jita", "Niarja", "shortest")
+        response = compute_route("Jita", "Urlen", "shortest")
 
         prev_cost = 0
         for hop in response.path:

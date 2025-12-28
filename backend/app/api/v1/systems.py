@@ -5,7 +5,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 
 from ...services.data_loader import load_universe, get_neighbors
-from ...services.risk_engine import compute_risk
+from ...services.risk_engine import compute_risk_async
 from ...models.system import SystemSummary
 from ...models.risk import RiskReport
 
@@ -58,12 +58,18 @@ def get_system(system_name: str) -> SystemSummary:
     summary="Get system risk report",
     description="Returns a risk assessment for the specified system based on recent activity.",
 )
-async def get_system_risk(system_name: str) -> RiskReport:
-    """Get risk assessment for a system."""
+async def get_system_risk(system_name: str, live: bool = True) -> RiskReport:
+    """
+    Get risk assessment for a system.
+
+    Args:
+        system_name: Name of the system
+        live: If true, fetch fresh kill data from zKillboard (default: true)
+    """
     universe = load_universe()
     if system_name not in universe.systems:
         raise HTTPException(status_code=404, detail=f"System '{system_name}' not found")
-    return compute_risk(system_name)
+    return await compute_risk_async(system_name, fetch_live=live)
 
 
 @router.get(

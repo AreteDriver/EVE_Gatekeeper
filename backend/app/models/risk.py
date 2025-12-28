@@ -28,3 +28,4 @@ class RiskReport(BaseModel):
     security: float
     score: float
     breakdown: RiskBreakdown
+    zkill_stats: ZKillStats | None = None

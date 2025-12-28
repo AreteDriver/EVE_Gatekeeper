@@ -32,7 +32,7 @@ class TestLoadUniverse:
 
         assert jita.id == 30000142
         assert jita.region_id == 10000002
-        assert jita.security == 0.9
+        assert jita.security == 0.95  # Real Jita security from SDE
         assert jita.category == "highsec"
         assert jita.position is not None
 
