@@ -29,6 +29,10 @@ def calculate_route(
         None,
         description="Systems to avoid (comma-separated or repeated param)",
     ),
+    bridges: bool = Query(
+        False,
+        description="Use Ansiblex jump bridges if available",
+    ),
 ) -> RouteResponse:
     """
     Calculate a route between two systems.
@@ -40,6 +44,7 @@ def calculate_route(
         - `safer`: Balanced approach, avoids high-risk systems
         - `paranoid`: Maximum safety, avoids all dangerous areas
     - **avoid**: Systems to exclude from routing (e.g., "Tama,Rancer" or multiple &avoid=Tama&avoid=Rancer)
+    - **bridges**: Use Ansiblex jump bridges in route calculation
     """
     cfg = load_risk_config()
     if profile not in cfg.routing_profiles:
@@ -57,7 +62,7 @@ def calculate_route(
             avoid_set.update(name.strip() for name in item.split(",") if name.strip())
 
     try:
-        return compute_route(from_system, to_system, profile, avoid=avoid_set)
+        return compute_route(from_system, to_system, profile, avoid=avoid_set, use_bridges=bridges)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

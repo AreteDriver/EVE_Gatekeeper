@@ -10,7 +10,7 @@ class TestBuildGraph:
 
     def test_build_graph_creates_bidirectional_edges(self):
         """Test that graph has bidirectional edges."""
-        graph = _build_graph()
+        graph, edge_types = _build_graph()
 
         # Jita -> Perimeter should exist
         assert "Perimeter" in graph["Jita"]
@@ -19,7 +19,7 @@ class TestBuildGraph:
 
     def test_build_graph_includes_all_systems(self):
         """Test that graph includes key systems."""
-        graph = _build_graph()
+        graph, edge_types = _build_graph()
 
         assert "Jita" in graph
         assert "Perimeter" in graph
@@ -31,7 +31,7 @@ class TestDijkstra:
 
     def test_dijkstra_finds_direct_path(self):
         """Test finding a direct path between adjacent systems."""
-        graph = _build_graph()
+        graph, _ = _build_graph()
         path, cost = _dijkstra(graph, "Jita", "Perimeter", "shortest")
 
         assert path == ["Jita", "Perimeter"]
@@ -39,7 +39,7 @@ class TestDijkstra:
 
     def test_dijkstra_finds_multi_hop_path(self):
         """Test finding a multi-hop path."""
-        graph = _build_graph()
+        graph, _ = _build_graph()
         path, cost = _dijkstra(graph, "Jita", "Urlen", "shortest")
 
         assert path == ["Jita", "Perimeter", "Urlen"]
@@ -47,7 +47,7 @@ class TestDijkstra:
 
     def test_dijkstra_same_start_end(self):
         """Test path when start equals end."""
-        graph = _build_graph()
+        graph, _ = _build_graph()
         path, cost = _dijkstra(graph, "Jita", "Jita", "shortest")
 
         assert path == ["Jita"]

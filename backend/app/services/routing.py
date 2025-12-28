@@ -2,19 +2,30 @@ import math
 from typing import Set
 
 from .data_loader import load_universe, load_risk_config
+from .jumpbridge import get_active_bridges
 from .risk_engine import compute_risk
 from ..models.route import RouteResponse, RouteHop
 
+# Edge type markers for distinguishing gates from bridges
+EDGE_GATE = "gate"
+EDGE_BRIDGE = "bridge"
 
-def _build_graph(avoid: Set[str] | None = None) -> dict[str, dict[str, float]]:
+
+def _build_graph(
+    avoid: Set[str] | None = None,
+    use_bridges: bool = False,
+) -> tuple[dict[str, dict[str, float]], dict[tuple[str, str], str]]:
     """
     Build navigation graph from universe data.
 
     Args:
         avoid: Set of system names to exclude from the graph
+        use_bridges: Whether to include Ansiblex jump bridges
 
     Returns:
-        Adjacency dict mapping system -> {neighbor -> distance}
+        Tuple of (adjacency dict, edge type dict)
+        - Adjacency: system -> {neighbor -> distance}
+        - Edge types: (from, to) -> "gate" or "bridge"
     """
     universe = load_universe()
     avoid = avoid or set()
@@ -23,7 +34,9 @@ def _build_graph(avoid: Set[str] | None = None) -> dict[str, dict[str, float]]:
     graph: dict[str, dict[str, float]] = {
         name: {} for name in universe.systems if name not in avoid
     }
+    edge_types: dict[tuple[str, str], str] = {}
 
+    # Add stargate connections
     for gate in universe.gates:
         # Skip gates involving avoided systems
         if gate.from_system in avoid or gate.to_system in avoid:
@@ -31,8 +44,24 @@ def _build_graph(avoid: Set[str] | None = None) -> dict[str, dict[str, float]]:
         if gate.from_system in graph and gate.to_system in graph:
             graph[gate.from_system][gate.to_system] = gate.distance
             graph[gate.to_system][gate.from_system] = gate.distance
+            edge_types[(gate.from_system, gate.to_system)] = EDGE_GATE
+            edge_types[(gate.to_system, gate.from_system)] = EDGE_GATE
 
-    return graph
+    # Add jump bridge connections
+    if use_bridges:
+        bridges = get_active_bridges()
+        for bridge in bridges:
+            if bridge.from_system in avoid or bridge.to_system in avoid:
+                continue
+            if bridge.from_system in graph and bridge.to_system in graph:
+                # Jump bridges have distance 1 (instant travel)
+                # Only add if not already connected (or prefer bridge)
+                graph[bridge.from_system][bridge.to_system] = 1.0
+                graph[bridge.to_system][bridge.from_system] = 1.0
+                edge_types[(bridge.from_system, bridge.to_system)] = EDGE_BRIDGE
+                edge_types[(bridge.to_system, bridge.from_system)] = EDGE_BRIDGE
+
+    return graph, edge_types
 
 
 def _dijkstra(graph: dict[str, dict[str, float]], start: str, end: str, profile: str) -> tuple[list[str], float]:
@@ -81,6 +110,7 @@ def compute_route(
     to_system: str,
     profile: str = "shortest",
     avoid: Set[str] | None = None,
+    use_bridges: bool = False,
 ) -> RouteResponse:
     """
     Compute a route between two systems.
@@ -90,6 +120,7 @@ def compute_route(
         to_system: Destination system name
         profile: Routing profile ('shortest', 'safer', 'paranoid')
         avoid: Set of system names to avoid in routing
+        use_bridges: Whether to use Ansiblex jump bridges
 
     Returns:
         RouteResponse with path details
@@ -106,7 +137,7 @@ def compute_route(
     if to_system in avoid:
         raise ValueError(f"Cannot avoid destination system: {to_system}")
 
-    graph = _build_graph(avoid)
+    graph, edge_types = _build_graph(avoid, use_bridges=use_bridges)
     path_names, total_cost = _dijkstra(graph, from_system, to_system, profile)
     if not path_names:
         raise ValueError("No route found")
@@ -115,15 +146,23 @@ def compute_route(
     total_risk = 0.0
     max_risk = 0.0
     cumulative_cost = 0.0
+    bridges_used = 0
 
     for idx, name in enumerate(path_names):
         rr = compute_risk(name)
         total_risk += rr.score
         max_risk = max(max_risk, rr.score)
+
+        # Determine connection type
+        connection_type = EDGE_GATE
         if idx > 0:
-            # cost between path_names[idx-1] and this one
-            edge_cost = graph[path_names[idx - 1]][name]
+            prev_name = path_names[idx - 1]
+            edge_cost = graph[prev_name][name]
             cumulative_cost += edge_cost
+            connection_type = edge_types.get((prev_name, name), EDGE_GATE)
+            if connection_type == EDGE_BRIDGE:
+                bridges_used += 1
+
         hops.append(
             RouteHop(
                 system_name=name,
@@ -131,6 +170,7 @@ def compute_route(
                 cumulative_jumps=idx,
                 cumulative_cost=cumulative_cost,
                 risk_score=rr.score,
+                connection_type=connection_type,
             )
         )
 
@@ -145,4 +185,5 @@ def compute_route(
         max_risk=max_risk,
         avg_risk=avg_risk,
         path=hops,
+        bridges_used=bridges_used,
     )
