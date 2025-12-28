@@ -7,7 +7,12 @@ from fastapi import APIRouter, HTTPException, Query
 from ...services.data_loader import load_universe, load_risk_config
 from ...services.risk_engine import compute_risk, risk_to_color
 from ...services.routing import compute_route
-from ...models.route import RouteResponse
+from ...models.route import (
+    RouteResponse,
+    RouteCompareRequest,
+    RouteCompareResponse,
+    RouteSummary,
+)
 
 router = APIRouter()
 
@@ -97,3 +102,122 @@ async def get_map_config() -> Dict[str, Any]:
         "layers": cfg.map_layers,
         "routing_profiles": list(cfg.routing_profiles.keys()),
     }
+
+
+@router.post(
+    "/compare",
+    response_model=RouteCompareResponse,
+    summary="Compare multiple routes",
+    description="Calculate and compare routes using different profiles.",
+)
+def compare_routes(request: RouteCompareRequest) -> RouteCompareResponse:
+    """
+    Compare routes between two systems using different profiles.
+
+    Returns a side-by-side comparison with a recommendation.
+    """
+    universe = load_universe()
+    cfg = load_risk_config()
+
+    # Validate systems
+    if request.from_system not in universe.systems:
+        raise HTTPException(status_code=400, detail=f"Unknown system: {request.from_system}")
+    if request.to_system not in universe.systems:
+        raise HTTPException(status_code=400, detail=f"Unknown system: {request.to_system}")
+
+    # Validate profiles
+    for profile in request.profiles:
+        if profile not in cfg.routing_profiles:
+            available = ", ".join(cfg.routing_profiles.keys())
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown profile: '{profile}'. Available: {available}",
+            )
+
+    avoid_set = set(request.avoid)
+    routes: List[RouteSummary] = []
+
+    for profile in request.profiles:
+        try:
+            route = compute_route(
+                request.from_system,
+                request.to_system,
+                profile,
+                avoid=avoid_set,
+                use_bridges=request.use_bridges,
+            )
+
+            # Count security categories
+            highsec = lowsec = nullsec = 0
+            for hop in route.path:
+                sys = universe.systems[hop.system_name]
+                if sys.category == "highsec":
+                    highsec += 1
+                elif sys.category == "lowsec":
+                    lowsec += 1
+                elif sys.category == "nullsec":
+                    nullsec += 1
+
+            routes.append(RouteSummary(
+                profile=profile,
+                total_jumps=route.total_jumps,
+                total_cost=round(route.total_cost, 2),
+                max_risk=round(route.max_risk, 1),
+                avg_risk=round(route.avg_risk, 1),
+                bridges_used=route.bridges_used,
+                highsec_jumps=highsec,
+                lowsec_jumps=lowsec,
+                nullsec_jumps=nullsec,
+                path_systems=[hop.system_name for hop in route.path],
+            ))
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+    # Generate recommendation
+    recommendation = _generate_recommendation(routes)
+
+    return RouteCompareResponse(
+        from_system=request.from_system,
+        to_system=request.to_system,
+        routes=routes,
+        recommendation=recommendation,
+    )
+
+
+def _generate_recommendation(routes: List[RouteSummary]) -> str:
+    """Generate a recommendation based on route comparison."""
+    if not routes:
+        return "No routes available"
+
+    if len(routes) == 1:
+        return f"Only {routes[0].profile} profile calculated"
+
+    # Find best by different criteria
+    shortest = min(routes, key=lambda r: r.total_jumps)
+    safest = min(routes, key=lambda r: r.max_risk)
+    lowest_avg = min(routes, key=lambda r: r.avg_risk)
+
+    # Check if all routes are the same
+    if all(r.total_jumps == routes[0].total_jumps and r.max_risk == routes[0].max_risk for r in routes):
+        return f"All profiles produce the same {routes[0].total_jumps}-jump route"
+
+    # Build recommendation
+    parts = []
+
+    if shortest.profile != safest.profile:
+        jump_diff = safest.total_jumps - shortest.total_jumps
+        risk_diff = shortest.max_risk - safest.max_risk
+        parts.append(
+            f"'{shortest.profile}' is fastest ({shortest.total_jumps} jumps) but riskier (max {shortest.max_risk:.0f}). "
+            f"'{safest.profile}' adds {jump_diff} jumps but reduces max risk by {risk_diff:.0f} points."
+        )
+    else:
+        parts.append(f"'{shortest.profile}' is both fastest and safest ({shortest.total_jumps} jumps, max risk {shortest.max_risk:.0f})")
+
+    # Note if any route avoids lowsec/nullsec entirely
+    for route in routes:
+        if route.lowsec_jumps == 0 and route.nullsec_jumps == 0 and route.total_jumps > 0:
+            parts.append(f"'{route.profile}' stays entirely in highsec.")
+            break
+
+    return " ".join(parts)
