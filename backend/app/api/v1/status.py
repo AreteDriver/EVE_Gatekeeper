@@ -1,7 +1,7 @@
 """Status API v1 endpoints."""
 
-from datetime import datetime, timezone
-from typing import Dict, Any
+from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter
 
@@ -10,7 +10,7 @@ from ...core.config import settings
 router = APIRouter()
 
 # Track start time for uptime calculation
-_start_time: datetime = datetime.now(timezone.utc)
+_start_time: datetime = datetime.now(UTC)
 
 
 def set_start_time(start: datetime) -> None:
@@ -24,14 +24,14 @@ def set_start_time(start: datetime) -> None:
     summary="Get API status",
     description="Returns detailed status information about the API.",
 )
-async def get_status() -> Dict[str, Any]:
+async def get_status() -> dict[str, Any]:
     """
     Get detailed API status including version, uptime, and component health.
 
     This endpoint provides more detail than /health and is intended for
     monitoring dashboards and admin interfaces.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     uptime = (now - _start_time).total_seconds()
 
     # Check database connectivity

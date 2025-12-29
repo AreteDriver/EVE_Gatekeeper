@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
 
-from ..services.data_loader import load_universe, load_risk_config
+from ..models.route import RouteResponse
+from ..services.data_loader import load_risk_config, load_universe
 from ..services.risk_engine import compute_risk, risk_to_color
 from ..services.routing import compute_route
-from ..models.route import RouteResponse
 
 router = APIRouter()
 
@@ -46,4 +46,4 @@ def get_route(
     try:
         return compute_route(from_system, to_system, profile)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None

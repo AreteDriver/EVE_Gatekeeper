@@ -10,13 +10,13 @@ Computes optimal jump routes for capital ships including:
 import heapq
 import math
 from dataclasses import dataclass, field
-from typing import Any
 
 import aiosqlite
 
-from backend.sde.schema import get_db_path
-from backend.sde.models import SolarSystem
 from backend.graph.universe_graph import UniverseGraph
+from backend.sde.models import SolarSystem
+from backend.sde.schema import get_db_path
+
 from .ship_data import (
     CAPITAL_SHIPS,
     CapitalShipData,

@@ -1,7 +1,7 @@
 """Risk calculation engine with zKillboard integration."""
 
+from ..models.risk import RiskBreakdown, RiskReport, ZKillStats
 from .data_loader import load_risk_config, load_universe
-from ..models.risk import ZKillStats, RiskReport, RiskBreakdown
 
 
 def _calculate_risk_score(
@@ -72,8 +72,8 @@ def compute_risk(system_name: str, stats: ZKillStats | None = None) -> RiskRepor
     """
     if stats is None:
         # Try to get cached stats synchronously
-        from .zkill_stats import get_cached_stats_sync
         from .data_loader import load_universe
+        from .zkill_stats import get_cached_stats_sync
 
         universe = load_universe()
         if system_name in universe.systems:
@@ -100,8 +100,8 @@ async def compute_risk_async(
     Returns:
         RiskReport with risk score and breakdown
     """
-    from .zkill_stats import fetch_system_kills
     from .data_loader import load_universe
+    from .zkill_stats import fetch_system_kills
 
     universe = load_universe()
 
@@ -134,8 +134,8 @@ async def compute_route_risks_async(
     Returns:
         Dict mapping system name to RiskReport
     """
-    from .zkill_stats import fetch_bulk_system_stats
     from .data_loader import load_universe
+    from .zkill_stats import fetch_bulk_system_stats
 
     universe = load_universe()
 

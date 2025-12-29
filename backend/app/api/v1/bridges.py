@@ -1,21 +1,20 @@
 """Jump bridge API v1 endpoints."""
 
-from typing import List
 
 from fastapi import APIRouter, HTTPException, Query
 
-from ...services.jumpbridge import (
-    load_bridge_config,
-    import_bridges,
-    toggle_network,
-    delete_network,
-    clear_bridge_cache,
-)
 from ...models.jumpbridge import (
     JumpBridgeConfig,
-    JumpBridgeNetwork,
     JumpBridgeImportRequest,
     JumpBridgeImportResponse,
+    JumpBridgeNetwork,
+)
+from ...services.jumpbridge import (
+    clear_bridge_cache,
+    delete_network,
+    import_bridges,
+    load_bridge_config,
+    toggle_network,
 )
 
 router = APIRouter()

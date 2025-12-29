@@ -15,8 +15,6 @@ Options:
 
 import argparse
 import asyncio
-import json
-import math
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -146,7 +144,7 @@ async def ingest_regions(
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
     insert_count = 0
-    for rid, result in zip(region_ids, results):
+    for rid, result in zip(region_ids, results, strict=False):
         if isinstance(result, Exception):
             print(f"  Error fetching region {rid}: {result}")
             continue
@@ -206,7 +204,7 @@ async def ingest_constellations(
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
     insert_count = 0
-    for cid, result in zip(constellation_ids, results):
+    for cid, result in zip(constellation_ids, results, strict=False):
         if isinstance(result, Exception):
             print(f"  Error fetching constellation {cid}: {result}")
             continue
@@ -272,7 +270,7 @@ async def ingest_systems(
         tasks = [fetch_system_details(client, sid) for sid in chunk]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        for sid, result in zip(chunk, results):
+        for sid, result in zip(chunk, results, strict=False):
             if isinstance(result, Exception):
                 print(f"  Error fetching system {sid}: {result}")
                 continue
@@ -361,7 +359,7 @@ async def ingest_stargates(
         tasks = [fetch_stargate_details(client, gid) for gid in chunk]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        for gid, result in zip(chunk, results):
+        for _gid, result in zip(chunk, results, strict=False):
             if isinstance(result, Exception):
                 # Some stargates may not exist (wormhole systems, etc.)
                 continue
@@ -432,7 +430,7 @@ async def ingest_stargates(
         )
 
     await db.commit()
-    print(f"Built connection graph")
+    print("Built connection graph")
 
 
 async def update_region_ids(db: aiosqlite.Connection) -> None:

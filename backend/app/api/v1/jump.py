@@ -1,23 +1,22 @@
 """Jump drive API v1 endpoints."""
 
-from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 
-from ...services.jump_drive import (
-    CapitalShipType,
-    calculate_jump_range,
-    calculate_distance_ly,
-    find_systems_in_range,
-    plan_jump_route,
-)
 from ...models.jump import (
-    ShipType,
+    JumpLegResponse,
     JumpRangeResponse,
+    JumpRouteResponse,
+    ShipType,
     SystemInRangeResponse,
     SystemsInRangeResponse,
-    JumpRouteResponse,
-    JumpLegResponse,
+)
+from ...services.jump_drive import (
+    CapitalShipType,
+    calculate_distance_ly,
+    calculate_jump_range,
+    find_systems_in_range,
+    plan_jump_route,
 )
 
 router = APIRouter()
@@ -75,7 +74,7 @@ def get_distance(
             "distance_ly": round(distance, 2),
         }
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
 
 
 @router.get(
@@ -91,7 +90,7 @@ def get_systems_in_range(
         description="Capital ship type",
     ),
     jdc: int = Query(5, ge=0, le=5, description="Jump Drive Calibration level"),
-    security: Optional[str] = Query(
+    security: str | None = Query(
         None,
         description="Filter by security: 'lowsec' or 'nullsec'",
     ),
@@ -116,7 +115,7 @@ def get_systems_in_range(
             security_filter=security,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
 
     # Add fuel requirements
     for sys in systems:
@@ -155,7 +154,7 @@ def get_jump_route(
     ),
     jdc: int = Query(5, ge=0, le=5, description="Jump Drive Calibration level"),
     jfc: int = Query(5, ge=0, le=5, description="Jump Fuel Conservation level"),
-    via: Optional[List[str]] = Query(
+    via: list[str] | None = Query(
         None,
         description="Specific midpoint systems to use",
     ),
@@ -182,7 +181,7 @@ def get_jump_route(
             midpoints=via,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
 
     return JumpRouteResponse(
         from_system=route.from_system,

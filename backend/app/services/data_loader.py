@@ -2,8 +2,8 @@ import json
 from functools import lru_cache
 
 from ..core.config import settings
-from ..models.system import Universe, UniverseMetadata, System, Gate
 from ..models.risk import RiskConfig
+from ..models.system import Gate, System, Universe, UniverseMetadata
 
 
 @lru_cache(maxsize=1)

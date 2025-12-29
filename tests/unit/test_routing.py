@@ -2,7 +2,7 @@
 
 import pytest
 
-from backend.app.services.routing import compute_route, _build_graph, _dijkstra
+from backend.app.services.routing import _build_graph, _dijkstra, compute_route
 
 
 class TestBuildGraph:

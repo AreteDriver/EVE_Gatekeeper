@@ -1,10 +1,10 @@
 """Graph algorithms for EVE universe navigation."""
 
 from .pathfinding import (
+    RouteResult,
+    RouteType,
     find_route,
     find_route_avoid,
-    RouteType,
-    RouteResult,
 )
 from .universe_graph import UniverseGraph
 

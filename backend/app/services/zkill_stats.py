@@ -2,8 +2,7 @@
 
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
-from typing import Dict, Optional
+from datetime import UTC, datetime
 
 import httpx
 
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 ZKILL_STATS_TTL = 600
 
 # Track rate limiting
-_last_request_time: datetime = datetime.min.replace(tzinfo=timezone.utc)
+_last_request_time: datetime = datetime.min.replace(tzinfo=UTC)
 _request_interval = 1.0  # Minimum seconds between requests (zKill asks for 1 req/sec)
 
 
@@ -29,13 +28,13 @@ def build_zkill_stats_key(system_id: int) -> str:
 async def _rate_limit() -> None:
     """Enforce rate limiting for zKillboard API."""
     global _last_request_time
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     elapsed = (now - _last_request_time).total_seconds()
 
     if elapsed < _request_interval:
         await asyncio.sleep(_request_interval - elapsed)
 
-    _last_request_time = datetime.now(timezone.utc)
+    _last_request_time = datetime.now(UTC)
 
 
 async def fetch_system_kills(system_id: int, hours: int = 24) -> ZKillStats:
@@ -114,7 +113,7 @@ async def fetch_system_kills(system_id: int, hours: int = 24) -> ZKillStats:
         return ZKillStats()
 
 
-async def fetch_bulk_system_stats(system_ids: list[int], hours: int = 24) -> Dict[int, ZKillStats]:
+async def fetch_bulk_system_stats(system_ids: list[int], hours: int = 24) -> dict[int, ZKillStats]:
     """
     Fetch kill stats for multiple systems efficiently.
 
@@ -127,7 +126,7 @@ async def fetch_bulk_system_stats(system_ids: list[int], hours: int = 24) -> Dic
     Returns:
         Dict mapping system_id to ZKillStats
     """
-    results: Dict[int, ZKillStats] = {}
+    results: dict[int, ZKillStats] = {}
     cache = await get_cache()
 
     # First pass: check cache
@@ -148,7 +147,7 @@ async def fetch_bulk_system_stats(system_ids: list[int], hours: int = 24) -> Dic
     return results
 
 
-def get_cached_stats_sync(system_id: int) -> Optional[ZKillStats]:
+def get_cached_stats_sync(system_id: int) -> ZKillStats | None:
     """
     Get cached zKill stats synchronously (for use in sync code paths).
 
@@ -177,7 +176,7 @@ class ZKillStatsPreloader:
 
     def __init__(self):
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
         # High-traffic systems to preload (major trade hubs and pipe systems)
         self._priority_systems = [
             30000142,  # Jita
@@ -228,7 +227,7 @@ class ZKillStatsPreloader:
 
 
 # Global preloader instance
-_preloader: Optional[ZKillStatsPreloader] = None
+_preloader: ZKillStatsPreloader | None = None
 
 
 def get_zkill_preloader() -> ZKillStatsPreloader:

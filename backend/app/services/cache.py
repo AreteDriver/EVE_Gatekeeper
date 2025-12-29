@@ -3,8 +3,7 @@
 import json
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
-from typing import Any, Optional, Dict
+from typing import Any
 
 from cachetools import TTLCache
 
@@ -17,7 +16,7 @@ class CacheService(ABC):
     """Abstract cache service interface."""
 
     @abstractmethod
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         """Get a value from cache."""
         pass
 
@@ -42,7 +41,7 @@ class CacheService(ABC):
         pass
 
     # Convenience methods for JSON serialization
-    async def get_json(self, key: str) -> Optional[Any]:
+    async def get_json(self, key: str) -> Any | None:
         """Get and deserialize JSON value from cache."""
         value = await self.get(key)
         if value is None:
@@ -68,7 +67,7 @@ class MemoryCacheService(CacheService):
 
     def __init__(self, maxsize: int = 10000):
         # Group caches by TTL for better memory management
-        self._caches: Dict[int, TTLCache] = {}
+        self._caches: dict[int, TTLCache] = {}
         self._maxsize = maxsize
         self._hits = 0
         self._misses = 0
@@ -79,7 +78,7 @@ class MemoryCacheService(CacheService):
             self._caches[ttl] = TTLCache(maxsize=self._maxsize, ttl=ttl)
         return self._caches[ttl]
 
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         """Get value from any cache that has this key."""
         for cache in self._caches.values():
             if key in cache:
@@ -117,7 +116,7 @@ class MemoryCacheService(CacheService):
             cache.clear()
         return True
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         total_entries = sum(len(cache) for cache in self._caches.values())
         return {
@@ -142,7 +141,7 @@ class RedisCacheService(CacheService):
         self._hits = 0
         self._misses = 0
 
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         """Get value from Redis."""
         try:
             value = await self._redis.get(key)
@@ -202,7 +201,7 @@ class RedisCacheService(CacheService):
         """Close Redis connection."""
         await self._redis.close()
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         return {
             "type": "redis",
@@ -213,7 +212,7 @@ class RedisCacheService(CacheService):
 
 
 # Global cache instance
-_cache: Optional[CacheService] = None
+_cache: CacheService | None = None
 
 
 async def get_cache() -> CacheService:

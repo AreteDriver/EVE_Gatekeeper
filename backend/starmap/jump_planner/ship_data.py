@@ -55,7 +55,7 @@ CAPITAL_SHIPS: dict[int, CapitalShipData] = {
     23917: CapitalShipData(23917, "Aeon", 5.0, 5000, FuelType.HELIUM),
     23919: CapitalShipData(23919, "Nyx", 5.0, 5000, FuelType.OXYGEN),
     22852: CapitalShipData(22852, "Hel", 5.0, 5000, FuelType.HYDROGEN),
-    23913: CapitalShipData(23913, "Wyvern", 5.0, 5000, FuelType.NITROGEN),
+    23918: CapitalShipData(23918, "Wyvern", 5.0, 5000, FuelType.NITROGEN),
 
     # Titans
     671: CapitalShipData(671, "Avatar", 5.0, 10000, FuelType.HELIUM),

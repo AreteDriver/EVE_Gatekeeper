@@ -8,9 +8,9 @@ Implements Dijkstra and A* algorithms with support for:
 
 import heapq
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable
 
 import aiosqlite
 

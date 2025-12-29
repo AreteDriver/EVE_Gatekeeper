@@ -16,26 +16,24 @@ Options:
 
 import argparse
 import asyncio
-from datetime import datetime
 import sys
+from datetime import datetime
 from pathlib import Path
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.esi import (
-    ESIClient,
-    ESICache,
-    get_system_kills,
-    get_system_jumps,
-    get_incursions,
-    get_sovereignty_map,
-    get_sovereignty_campaigns,
-)
-from backend.sde.schema import get_db_path
-
 import aiosqlite
 
+from backend.esi import (
+    ESICache,
+    ESIClient,
+    get_incursions,
+    get_sovereignty_map,
+    get_system_jumps,
+    get_system_kills,
+)
+from backend.sde.schema import get_db_path
 
 # Refresh intervals (seconds)
 INTERVALS = {

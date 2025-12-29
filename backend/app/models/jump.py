@@ -1,6 +1,5 @@
 """Pydantic models for jump drive operations."""
 
-from typing import List, Optional
 from enum import Enum
 
 from pydantic import BaseModel, Field
@@ -59,7 +58,7 @@ class JumpRouteResponse(BaseModel):
     total_fuel: int
     total_fatigue_minutes: float
     total_travel_time_minutes: float
-    legs: List[JumpLegResponse]
+    legs: list[JumpLegResponse]
 
 
 class SystemsInRangeResponse(BaseModel):
@@ -67,4 +66,4 @@ class SystemsInRangeResponse(BaseModel):
     origin: str
     max_range_ly: float
     count: int
-    systems: List[SystemInRangeResponse]
+    systems: list[SystemInRangeResponse]

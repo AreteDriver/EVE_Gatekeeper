@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Any
+from typing import Any
 
 from fastapi import WebSocket
 
@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 class ClientSubscription:
     """Represents a client's subscription filters."""
 
-    systems: Set[int] = field(default_factory=set)  # System IDs to watch
-    regions: Set[int] = field(default_factory=set)  # Region IDs to watch
+    systems: set[int] = field(default_factory=set)  # System IDs to watch
+    regions: set[int] = field(default_factory=set)  # Region IDs to watch
     min_value: float = 0  # Minimum ISK value to receive
     include_pods: bool = True
 
@@ -33,7 +33,7 @@ class ConnectionManager:
     """Manages WebSocket connections and message broadcasting."""
 
     def __init__(self):
-        self._clients: Dict[str, ConnectedClient] = {}
+        self._clients: dict[str, ConnectedClient] = {}
         self._lock = asyncio.Lock()
 
     @property
@@ -62,10 +62,10 @@ class ConnectionManager:
     async def update_subscription(
         self,
         client_id: str,
-        systems: Optional[List[int]] = None,
-        regions: Optional[List[int]] = None,
-        min_value: Optional[float] = None,
-        include_pods: Optional[bool] = None,
+        systems: list[int] | None = None,
+        regions: list[int] | None = None,
+        min_value: float | None = None,
+        include_pods: bool | None = None,
     ) -> bool:
         """Update a client's subscription filters."""
         async with self._lock:
@@ -85,7 +85,7 @@ class ConnectionManager:
         logger.debug(f"Updated subscription for client {client_id}")
         return True
 
-    def _matches_filter(self, kill_data: Dict[str, Any], subscription: ClientSubscription) -> bool:
+    def _matches_filter(self, kill_data: dict[str, Any], subscription: ClientSubscription) -> bool:
         """Check if a kill matches a client's subscription filters."""
         # If no filters are set, match everything
         if not subscription.systems and not subscription.regions:
@@ -108,7 +108,7 @@ class ConnectionManager:
 
         return True
 
-    async def send_to_client(self, client_id: str, message: Dict[str, Any]) -> bool:
+    async def send_to_client(self, client_id: str, message: dict[str, Any]) -> bool:
         """Send a message to a specific client."""
         async with self._lock:
             if client_id not in self._clients:
@@ -123,10 +123,10 @@ class ConnectionManager:
             await self.disconnect(client_id)
             return False
 
-    async def broadcast(self, message: Dict[str, Any]) -> int:
+    async def broadcast(self, message: dict[str, Any]) -> int:
         """Broadcast a message to all connected clients."""
         sent_count = 0
-        disconnected: List[str] = []
+        disconnected: list[str] = []
 
         async with self._lock:
             clients = list(self._clients.items())
@@ -145,10 +145,10 @@ class ConnectionManager:
 
         return sent_count
 
-    async def broadcast_kill(self, kill_data: Dict[str, Any]) -> int:
+    async def broadcast_kill(self, kill_data: dict[str, Any]) -> int:
         """Broadcast a kill to clients that match the filters."""
         sent_count = 0
-        disconnected: List[str] = []
+        disconnected: list[str] = []
 
         async with self._lock:
             clients = list(self._clients.items())
@@ -184,7 +184,7 @@ class ConnectionManager:
 
         return sent_count
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get connection statistics."""
         return {
             "active_connections": self.connection_count,

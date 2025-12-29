@@ -4,10 +4,9 @@ These models are designed for future database storage of universe data.
 Currently, the app uses JSON files for data storage.
 """
 
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
-from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Index, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -20,7 +19,7 @@ class Region(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    faction_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    faction_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Relationships
     systems: Mapped[list["SolarSystem"]] = relationship(back_populates="region")
@@ -37,12 +36,12 @@ class SolarSystem(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     region_id: Mapped[int] = mapped_column(Integer, ForeignKey("regions.id"), nullable=False)
-    constellation_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    constellation_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     security_status: Mapped[float] = mapped_column(Float, nullable=False)
     security_class: Mapped[str] = mapped_column(String(20), nullable=False)  # highsec, lowsec, nullsec, wh
     position_x: Mapped[float] = mapped_column(Float, nullable=False)
     position_y: Mapped[float] = mapped_column(Float, nullable=False)
-    position_z: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    position_z: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # Relationships
     region: Mapped["Region"] = relationship(back_populates="systems")
@@ -107,15 +106,15 @@ class KillRecord(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)  # zKillboard kill ID
     system_id: Mapped[int] = mapped_column(Integer, ForeignKey("solar_systems.id"), nullable=False)
     kill_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    ship_type_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    victim_corporation_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    victim_alliance_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    ship_type_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    victim_corporation_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    victim_alliance_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     attacker_count: Mapped[int] = mapped_column(Integer, default=0)
     is_pod: Mapped[bool] = mapped_column(default=False)
-    total_value: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    total_value: Mapped[float | None] = mapped_column(Float, nullable=True)
     fetched_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
 
     __table_args__ = (
@@ -136,7 +135,7 @@ class CacheEntry(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
 
     __table_args__ = (

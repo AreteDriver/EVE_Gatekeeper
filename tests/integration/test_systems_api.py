@@ -1,6 +1,5 @@
 """Integration tests for systems API endpoints."""
 
-import pytest
 
 
 class TestSystemsListEndpoint:

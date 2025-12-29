@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
 
-from ..services.data_loader import load_universe, get_neighbors
-from ..services.risk_engine import compute_risk
-from ..models.system import SystemSummary
 from ..models.risk import RiskReport
+from ..models.system import SystemSummary
+from ..services.data_loader import get_neighbors, load_universe
+from ..services.risk_engine import compute_risk
 
 router = APIRouter()
 

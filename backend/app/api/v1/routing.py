@@ -1,18 +1,21 @@
 """Routing API v1 endpoints."""
 
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 
-from ...services.data_loader import load_universe, load_risk_config
-from ...services.risk_engine import compute_risk, risk_to_color
-from ...services.routing import compute_route
 from ...models.route import (
-    RouteResponse,
+    BulkRouteRequest,
+    BulkRouteResponse,
+    BulkRouteResult,
     RouteCompareRequest,
     RouteCompareResponse,
+    RouteResponse,
     RouteSummary,
 )
+from ...services.data_loader import load_risk_config, load_universe
+from ...services.risk_engine import compute_risk, risk_to_color
+from ...services.routing import compute_route
 
 router = APIRouter()
 
@@ -30,7 +33,7 @@ def calculate_route(
         "shortest",
         description="Routing profile: 'shortest', 'safer', or 'paranoid'",
     ),
-    avoid: Optional[List[str]] = Query(
+    avoid: list[str] | None = Query(
         None,
         description="Systems to avoid (comma-separated or repeated param)",
     ),
@@ -69,7 +72,7 @@ def calculate_route(
     try:
         return compute_route(from_system, to_system, profile, avoid=avoid_set, use_bridges=bridges)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from None
 
 
 @router.get(
@@ -77,7 +80,7 @@ def calculate_route(
     summary="Get map configuration",
     description="Returns the complete map configuration including all systems, risk scores, and colors.",
 )
-async def get_map_config() -> Dict[str, Any]:
+async def get_map_config() -> dict[str, Any]:
     """Get the complete map configuration for visualization."""
     universe = load_universe()
     cfg = load_risk_config()
@@ -135,7 +138,7 @@ def compare_routes(request: RouteCompareRequest) -> RouteCompareResponse:
             )
 
     avoid_set = set(request.avoid)
-    routes: List[RouteSummary] = []
+    routes: list[RouteSummary] = []
 
     for profile in request.profiles:
         try:
@@ -171,7 +174,7 @@ def compare_routes(request: RouteCompareRequest) -> RouteCompareResponse:
                 path_systems=[hop.system_name for hop in route.path],
             ))
         except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException(status_code=400, detail=str(e)) from None
 
     # Generate recommendation
     recommendation = _generate_recommendation(routes)
@@ -184,7 +187,7 @@ def compare_routes(request: RouteCompareRequest) -> RouteCompareResponse:
     )
 
 
-def _generate_recommendation(routes: List[RouteSummary]) -> str:
+def _generate_recommendation(routes: list[RouteSummary]) -> str:
     """Generate a recommendation based on route comparison."""
     if not routes:
         return "No routes available"
@@ -195,7 +198,7 @@ def _generate_recommendation(routes: List[RouteSummary]) -> str:
     # Find best by different criteria
     shortest = min(routes, key=lambda r: r.total_jumps)
     safest = min(routes, key=lambda r: r.max_risk)
-    lowest_avg = min(routes, key=lambda r: r.avg_risk)
+    min(routes, key=lambda r: r.avg_risk)
 
     # Check if all routes are the same
     if all(r.total_jumps == routes[0].total_jumps and r.max_risk == routes[0].max_risk for r in routes):
@@ -221,3 +224,101 @@ def _generate_recommendation(routes: List[RouteSummary]) -> str:
             break
 
     return " ".join(parts)
+
+
+@router.post(
+    "/bulk",
+    response_model=BulkRouteResponse,
+    summary="Calculate routes to multiple destinations",
+    description="Calculate routes from one origin to multiple destinations.",
+)
+def bulk_routes(request: BulkRouteRequest) -> BulkRouteResponse:
+    """
+    Calculate routes from one origin to multiple destinations.
+
+    Useful for planning multi-stop trips or comparing distances to various systems.
+    Results are sorted by jump count (shortest first).
+    """
+    universe = load_universe()
+    cfg = load_risk_config()
+
+    # Validate origin
+    if request.from_system not in universe.systems:
+        raise HTTPException(status_code=400, detail=f"Unknown origin system: {request.from_system}")
+
+    # Validate profile
+    if request.profile not in cfg.routing_profiles:
+        available = ", ".join(cfg.routing_profiles.keys())
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown profile: '{request.profile}'. Available: {available}",
+        )
+
+    avoid_set = set(request.avoid)
+    results: list[BulkRouteResult] = []
+    successful = 0
+    failed = 0
+
+    for dest in request.to_systems:
+        # Skip if destination equals origin
+        if dest == request.from_system:
+            results.append(BulkRouteResult(
+                to_system=dest,
+                success=True,
+                total_jumps=0,
+                total_cost=0.0,
+                max_risk=0.0,
+                avg_risk=0.0,
+                path_systems=[dest],
+            ))
+            successful += 1
+            continue
+
+        # Check if destination exists
+        if dest not in universe.systems:
+            results.append(BulkRouteResult(
+                to_system=dest,
+                success=False,
+                error=f"Unknown system: {dest}",
+            ))
+            failed += 1
+            continue
+
+        try:
+            route = compute_route(
+                request.from_system,
+                dest,
+                request.profile,
+                avoid=avoid_set,
+                use_bridges=request.use_bridges,
+            )
+            results.append(BulkRouteResult(
+                to_system=dest,
+                success=True,
+                total_jumps=route.total_jumps,
+                total_cost=round(route.total_cost, 2),
+                max_risk=round(route.max_risk, 1),
+                avg_risk=round(route.avg_risk, 1),
+                bridges_used=route.bridges_used,
+                path_systems=[hop.system_name for hop in route.path],
+            ))
+            successful += 1
+        except ValueError as e:
+            results.append(BulkRouteResult(
+                to_system=dest,
+                success=False,
+                error=str(e),
+            ))
+            failed += 1
+
+    # Sort by jump count (successful routes first, then by jumps)
+    results.sort(key=lambda r: (not r.success, r.total_jumps or 999999))
+
+    return BulkRouteResponse(
+        from_system=request.from_system,
+        profile=request.profile,
+        total_destinations=len(request.to_systems),
+        successful=successful,
+        failed=failed,
+        routes=results,
+    )

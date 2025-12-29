@@ -1,8 +1,8 @@
 """WebSocket endpoints for real-time updates."""
 
-import uuid
 import logging
-from typing import Any, Dict, List, Optional
+import uuid
+from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -84,7 +84,7 @@ async def killfeed_websocket(websocket: WebSocket):
 
 async def handle_client_message(
     client_id: str,
-    data: Dict[str, Any],
+    data: dict[str, Any],
     websocket: WebSocket,
 ) -> None:
     """Handle incoming messages from WebSocket clients."""
@@ -92,10 +92,10 @@ async def handle_client_message(
 
     if message_type == "subscribe":
         # Update subscription filters
-        systems: Optional[List[int]] = data.get("systems")
-        regions: Optional[List[int]] = data.get("regions")
-        min_value: Optional[float] = data.get("min_value")
-        include_pods: Optional[bool] = data.get("include_pods")
+        systems: list[int] | None = data.get("systems")
+        regions: list[int] | None = data.get("regions")
+        min_value: float | None = data.get("min_value")
+        include_pods: bool | None = data.get("include_pods")
 
         success = await connection_manager.update_subscription(
             client_id,

@@ -2,12 +2,12 @@
 
 from fastapi import APIRouter, Response
 from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    REGISTRY,
     Counter,
     Gauge,
     Histogram,
     generate_latest,
-    CONTENT_TYPE_LATEST,
-    REGISTRY,
 )
 
 from ..core.config import settings

@@ -2,7 +2,6 @@
 
 import math
 from dataclasses import dataclass
-from typing import List, Optional, Dict
 from enum import Enum
 
 from .data_loader import load_universe
@@ -21,7 +20,7 @@ class CapitalShipType(str, Enum):
 
 
 # Base jump range in light years (before skills)
-SHIP_BASE_RANGE: Dict[CapitalShipType, float] = {
+SHIP_BASE_RANGE: dict[CapitalShipType, float] = {
     CapitalShipType.JUMP_FREIGHTER: 5.0,
     CapitalShipType.CARRIER: 5.0,
     CapitalShipType.DREADNOUGHT: 5.0,
@@ -33,7 +32,7 @@ SHIP_BASE_RANGE: Dict[CapitalShipType, float] = {
 }
 
 # Fuel consumption per light year (isotopes)
-SHIP_FUEL_PER_LY: Dict[CapitalShipType, int] = {
+SHIP_FUEL_PER_LY: dict[CapitalShipType, int] = {
     CapitalShipType.JUMP_FREIGHTER: 1000,
     CapitalShipType.CARRIER: 1000,
     CapitalShipType.DREADNOUGHT: 1000,
@@ -95,7 +94,7 @@ class JumpRoute:
     total_fuel: int
     total_fatigue_minutes: float
     total_travel_time_minutes: float
-    legs: List[JumpLeg]
+    legs: list[JumpLeg]
 
 
 def calculate_jump_range(
@@ -168,8 +167,8 @@ def calculate_distance_ly(system1: str, system2: str) -> float:
 def find_systems_in_range(
     origin: str,
     max_range_ly: float,
-    security_filter: Optional[str] = None,
-) -> List[SystemInRange]:
+    security_filter: str | None = None,
+) -> list[SystemInRange]:
     """
     Find all systems within jump range of origin.
 
@@ -187,7 +186,7 @@ def find_systems_in_range(
         raise ValueError(f"Unknown system: {origin}")
 
     origin_pos = universe.systems[origin].position
-    results: List[SystemInRange] = []
+    results: list[SystemInRange] = []
 
     for name, system in universe.systems.items():
         if name == origin:
@@ -266,7 +265,7 @@ def plan_jump_route(
     ship_type: CapitalShipType = CapitalShipType.JUMP_FREIGHTER,
     jdc_level: int = 5,
     jfc_level: int = 5,
-    midpoints: Optional[List[str]] = None,
+    midpoints: list[str] | None = None,
 ) -> JumpRoute:
     """
     Plan a jump route between two systems.
@@ -294,7 +293,7 @@ def plan_jump_route(
         )
 
     # Calculate each leg
-    legs: List[JumpLeg] = []
+    legs: list[JumpLeg] = []
     total_fuel = 0
     total_distance = 0.0
     current_fatigue = 0.0
@@ -347,7 +346,7 @@ def _auto_plan_waypoints(
     from_system: str,
     to_system: str,
     max_range_ly: float,
-) -> List[str]:
+) -> list[str]:
     """
     Automatically plan waypoints for a jump route using greedy approach.
 

@@ -4,11 +4,10 @@ These functions provide high-level access to ESI endpoints
 with automatic caching and error handling.
 """
 
-from datetime import datetime
 from typing import Any
 
-from .client import ESIClient
 from .cache import ESICache
+from .client import ESIClient
 
 
 async def get_system_kills(

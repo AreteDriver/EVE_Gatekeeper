@@ -4,9 +4,9 @@ import pytest
 
 from backend.app.services.cache import (
     MemoryCacheService,
-    build_route_key,
-    build_risk_key,
     build_esi_key,
+    build_risk_key,
+    build_route_key,
 )
 
 

@@ -1,24 +1,24 @@
 """EVE Gatekeeper API - Main Application."""
 
-from datetime import datetime, timezone
-from typing import Dict, Any
+from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
-from .core.config import settings
-from .api import routes_systems, routes_map
+from .api import routes_map, routes_systems
+from .api.metrics import router as metrics_router
 from .api.v1 import router as v1_router
 from .api.v1.status import set_start_time
-from .api.metrics import router as metrics_router
+from .core.config import settings
+from .logging import LoggingMiddleware, configure_logging
 from .middleware import (
-    setup_rate_limiting,
-    SecurityHeadersMiddleware,
     RequestContextMiddleware,
+    SecurityHeadersMiddleware,
+    setup_rate_limiting,
 )
 from .middleware.security import RequestSizeLimitMiddleware
-from .logging import configure_logging, LoggingMiddleware
 
 # Configure structured logging
 configure_logging()
@@ -93,14 +93,14 @@ def create_app() -> FastAPI:
 app = create_app()
 
 # Store startup time for uptime calculation
-_startup_time: datetime = datetime.now(timezone.utc)
+_startup_time: datetime = datetime.now(UTC)
 
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize application on startup."""
     global _startup_time
-    _startup_time = datetime.now(timezone.utc)
+    _startup_time = datetime.now(UTC)
     set_start_time(_startup_time)
 
     # Start zKillboard listener for real-time kill feed
@@ -123,13 +123,13 @@ async def shutdown_event():
 
 
 @app.get("/health", tags=["health"])
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """
     Health check endpoint for container orchestration.
 
     Returns health status with component checks.
     """
-    uptime = (datetime.now(timezone.utc) - _startup_time).total_seconds()
+    uptime = (datetime.now(UTC) - _startup_time).total_seconds()
 
     # Check database connectivity
     database_status = "ok"
@@ -164,7 +164,7 @@ async def health_check() -> Dict[str, Any]:
     return {
         "status": overall_status,
         "version": settings.API_VERSION,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "uptime_seconds": uptime,
         "checks": {
             "database": database_status,
@@ -175,7 +175,7 @@ async def health_check() -> Dict[str, Any]:
 
 
 @app.get("/", tags=["root"])
-async def root() -> Dict[str, str]:
+async def root() -> dict[str, str]:
     """Root endpoint with API information."""
     return {
         "name": settings.PROJECT_NAME,

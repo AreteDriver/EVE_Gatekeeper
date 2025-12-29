@@ -1,7 +1,7 @@
 """Pydantic models for EVE Online universe data."""
 
 from datetime import datetime
-from typing import Optional
+
 from pydantic import BaseModel, Field, computed_field
 
 
@@ -10,11 +10,11 @@ class Region(BaseModel):
 
     region_id: int
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     x: float = 0.0
     y: float = 0.0
     z: float = 0.0
-    faction_id: Optional[int] = None
+    faction_id: int | None = None
 
     model_config = {"from_attributes": True}
 
@@ -28,7 +28,7 @@ class Constellation(BaseModel):
     x: float = 0.0
     y: float = 0.0
     z: float = 0.0
-    faction_id: Optional[int] = None
+    faction_id: int | None = None
 
     model_config = {"from_attributes": True}
 
@@ -45,18 +45,18 @@ class SolarSystem(BaseModel):
     y: float
     z: float
     # 2D map projection
-    map_x: Optional[float] = None
-    map_y: Optional[float] = None
+    map_x: float | None = None
+    map_y: float | None = None
     # Security
     security_status: float = 0.0
-    security_class: Optional[str] = None
+    security_class: str | None = None
     # Star data
-    star_id: Optional[int] = None
-    star_type_id: Optional[int] = None
+    star_id: int | None = None
+    star_type_id: int | None = None
     # Sovereignty
-    sovereignty_faction_id: Optional[int] = None
-    sovereignty_corp_id: Optional[int] = None
-    sovereignty_alliance_id: Optional[int] = None
+    sovereignty_faction_id: int | None = None
+    sovereignty_corp_id: int | None = None
+    sovereignty_alliance_id: int | None = None
     # Flags
     is_wormhole: bool = False
     is_abyssal: bool = False
@@ -92,11 +92,11 @@ class Stargate(BaseModel):
     system_id: int
     destination_stargate_id: int
     destination_system_id: int
-    name: Optional[str] = None
-    type_id: Optional[int] = None
-    x: Optional[float] = None
-    y: Optional[float] = None
-    z: Optional[float] = None
+    name: str | None = None
+    type_id: int | None = None
+    x: float | None = None
+    y: float | None = None
+    z: float | None = None
 
     model_config = {"from_attributes": True}
 
@@ -127,8 +127,8 @@ class SystemStats(BaseModel):
     npc_kills: int = 0
     pod_kills: int = 0
     ship_jumps: int = 0
-    kills_updated_at: Optional[datetime] = None
-    jumps_updated_at: Optional[datetime] = None
+    kills_updated_at: datetime | None = None
+    jumps_updated_at: datetime | None = None
     activity_index: float = 0.0
 
     model_config = {"from_attributes": True}
@@ -157,15 +157,15 @@ class SystemStats(BaseModel):
 class Incursion(BaseModel):
     """Sansha incursion event."""
 
-    incursion_id: Optional[int] = None
+    incursion_id: int | None = None
     constellation_id: int
-    staging_system_id: Optional[int] = None
+    staging_system_id: int | None = None
     state: str  # 'withdrawing', 'mobilizing', 'established'
     influence: float = 0.0
     has_boss: bool = False
-    faction_id: Optional[int] = None
-    fetched_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
+    faction_id: int | None = None
+    fetched_at: datetime | None = None
+    expires_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 
@@ -174,12 +174,12 @@ class Sovereignty(BaseModel):
     """System sovereignty data."""
 
     system_id: int
-    alliance_id: Optional[int] = None
-    corporation_id: Optional[int] = None
-    faction_id: Optional[int] = None
-    vulnerability_occupancy_level: Optional[float] = None
-    fetched_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
+    alliance_id: int | None = None
+    corporation_id: int | None = None
+    faction_id: int | None = None
+    vulnerability_occupancy_level: float | None = None
+    fetched_at: datetime | None = None
+    expires_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 
@@ -191,13 +191,13 @@ class SovereigntyCampaign(BaseModel):
     system_id: int
     constellation_id: int
     event_type: str
-    structure_id: Optional[int] = None
-    start_time: Optional[datetime] = None
-    defender_id: Optional[int] = None
+    structure_id: int | None = None
+    start_time: datetime | None = None
+    defender_id: int | None = None
     defender_score: float = 0.0
     attackers_score: float = 0.0
-    fetched_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
+    fetched_at: datetime | None = None
+    expires_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 
@@ -210,19 +210,19 @@ class SovereigntyCampaign(BaseModel):
 class ShipConfig(BaseModel):
     """Capital ship jump configuration."""
 
-    config_id: Optional[int] = None
+    config_id: int | None = None
     name: str
     ship_type_id: int
     # Jump drive base attributes
-    jump_drive_fuel_need: Optional[float] = None  # Isotopes per LY
-    jump_drive_range: Optional[float] = None  # Max LY base
+    jump_drive_fuel_need: float | None = None  # Isotopes per LY
+    jump_drive_range: float | None = None  # Max LY base
     jump_drive_consumption_modifier: float = 1.0
     # Skill levels
     fuel_conservation_level: int = 0  # JFC 0-5
     jump_drive_calibration_level: int = 0  # JDC 0-5
     jump_freighter_level: int = 0  # Jump Freighter 0-5
     # Computed
-    effective_range: Optional[float] = None
+    effective_range: float | None = None
 
     model_config = {"from_attributes": True}
 
@@ -256,9 +256,9 @@ class ShipConfig(BaseModel):
 class PilotProfile(BaseModel):
     """Pilot skill and preference profile."""
 
-    profile_id: Optional[int] = None
-    character_id: Optional[int] = None
-    character_name: Optional[str] = None
+    profile_id: int | None = None
+    character_id: int | None = None
+    character_name: str | None = None
     # Jump skills
     jump_drive_calibration: int = 0
     jump_fuel_conservation: int = 0
@@ -276,15 +276,15 @@ class PilotProfile(BaseModel):
 class SavedRoute(BaseModel):
     """Saved navigation route."""
 
-    route_id: Optional[int] = None
-    name: Optional[str] = None
+    route_id: int | None = None
+    name: str | None = None
     origin_system_id: int
     destination_system_id: int
     route_type: str = "shortest"  # 'shortest', 'secure', 'insecure'
     avoid_systems: list[int] = Field(default_factory=list)
     avoid_regions: list[int] = Field(default_factory=list)
     waypoints: list[int] = Field(default_factory=list)
-    total_jumps: Optional[int] = None
+    total_jumps: int | None = None
 
     model_config = {"from_attributes": True}
 
@@ -294,21 +294,21 @@ class CynoChainMidpoint(BaseModel):
 
     system_id: int
     is_cyno_beacon: bool = False
-    fuel_required: Optional[int] = None
+    fuel_required: int | None = None
 
 
 class CynoChain(BaseModel):
     """Capital ship cyno chain route."""
 
-    chain_id: Optional[int] = None
-    name: Optional[str] = None
-    ship_config_id: Optional[int] = None
-    pilot_profile_id: Optional[int] = None
+    chain_id: int | None = None
+    name: str | None = None
+    ship_config_id: int | None = None
+    pilot_profile_id: int | None = None
     origin_system_id: int
     destination_system_id: int
     midpoints: list[CynoChainMidpoint] = Field(default_factory=list)
-    total_fuel: Optional[int] = None
-    total_legs: Optional[int] = None
+    total_fuel: int | None = None
+    total_legs: int | None = None
 
     model_config = {"from_attributes": True}
 

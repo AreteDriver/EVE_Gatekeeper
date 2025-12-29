@@ -2,7 +2,7 @@
 
 import asyncio
 from datetime import datetime, timedelta
-from typing import Any, Callable
+from typing import Any
 from urllib.parse import urlencode
 
 import httpx

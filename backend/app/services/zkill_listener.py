@@ -2,8 +2,9 @@
 
 import asyncio
 import logging
-from typing import Any, Callable, Dict, Optional
-from datetime import datetime, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 
@@ -19,16 +20,16 @@ class ZKillListener:
 
     def __init__(
         self,
-        queue_id: Optional[str] = None,
-        on_kill: Optional[Callable[[Dict[str, Any]], None]] = None,
+        queue_id: str | None = None,
+        on_kill: Callable[[dict[str, Any]], None] | None = None,
     ):
         self.queue_id = queue_id or "eve-gatekeeper"
         self.on_kill = on_kill
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
         self._reconnect_delay = 1  # Start with 1 second
         self._max_reconnect_delay = 60  # Max 60 seconds
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
     @property
     def is_running(self) -> bool:
@@ -117,7 +118,7 @@ class ZKillListener:
         # Process the kill
         await self._process_kill(package)
 
-    async def _process_kill(self, package: Dict[str, Any]) -> None:
+    async def _process_kill(self, package: dict[str, Any]) -> None:
         """Process a kill package from zKillboard."""
         try:
             killmail = package.get("killmail", {})
@@ -171,7 +172,7 @@ class ZKillListener:
                 "npc": zkb.get("npc", False),
                 "solo": zkb.get("solo", False),
                 "risk_score": risk_score,
-                "received_at": datetime.now(timezone.utc).isoformat(),
+                "received_at": datetime.now(UTC).isoformat(),
             }
 
             logger.debug(
@@ -191,7 +192,7 @@ class ZKillListener:
 
 
 # Global listener instance
-_zkill_listener: Optional[ZKillListener] = None
+_zkill_listener: ZKillListener | None = None
 
 
 def get_zkill_listener() -> ZKillListener:

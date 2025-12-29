@@ -3,17 +3,15 @@
 import json
 import re
 from pathlib import Path
-from typing import List, Tuple
 
 from ..core.config import settings
 from ..models.jumpbridge import (
     JumpBridge,
-    JumpBridgeNetwork,
     JumpBridgeConfig,
     JumpBridgeImportResponse,
+    JumpBridgeNetwork,
 )
 from .data_loader import load_universe
-
 
 # Cache for jump bridge config
 _bridge_config: JumpBridgeConfig | None = None
@@ -56,7 +54,7 @@ def clear_bridge_cache() -> None:
     _bridge_config = None
 
 
-def parse_bridge_text(text: str) -> Tuple[List[JumpBridge], List[str]]:
+def parse_bridge_text(text: str) -> tuple[list[JumpBridge], list[str]]:
     """
     Parse jump bridge text format into bridge objects.
 
@@ -73,8 +71,8 @@ def parse_bridge_text(text: str) -> Tuple[List[JumpBridge], List[str]]:
         Tuple of (parsed bridges, error messages)
     """
     universe = load_universe()
-    bridges: List[JumpBridge] = []
-    errors: List[str] = []
+    bridges: list[JumpBridge] = []
+    errors: list[str] = []
     seen: set[tuple[str, str]] = set()
 
     # Patterns for different formats
@@ -184,7 +182,7 @@ def import_bridges(
     )
 
 
-def get_active_bridges() -> List[JumpBridge]:
+def get_active_bridges() -> list[JumpBridge]:
     """Get all bridges from enabled networks."""
     config = load_bridge_config()
     return config.get_active_bridges()

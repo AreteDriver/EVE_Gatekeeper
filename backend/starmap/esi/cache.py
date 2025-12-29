@@ -8,7 +8,6 @@ import aiosqlite
 
 from backend.sde.schema import get_db_path
 
-
 # Default TTL values for different endpoint types (in seconds)
 TTL_CONFIG = {
     # Live data - short TTL

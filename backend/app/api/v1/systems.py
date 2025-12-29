@@ -1,24 +1,23 @@
 """Systems API v1 endpoints."""
 
-from typing import List
 
 from fastapi import APIRouter, HTTPException
 
-from ...services.data_loader import load_universe, get_neighbors
-from ...services.risk_engine import compute_risk_async
-from ...models.system import SystemSummary
 from ...models.risk import RiskReport
+from ...models.system import SystemSummary
+from ...services.data_loader import get_neighbors, load_universe
+from ...services.risk_engine import compute_risk_async
 
 router = APIRouter()
 
 
 @router.get(
     "/",
-    response_model=List[SystemSummary],
+    response_model=list[SystemSummary],
     summary="List all systems",
     description="Returns a list of all systems in the EVE universe with basic information.",
 )
-def list_systems() -> List[SystemSummary]:
+def list_systems() -> list[SystemSummary]:
     """Get all systems in the universe."""
     universe = load_universe()
     return [
@@ -80,11 +79,11 @@ async def get_system_risk(system_name: str, live: bool = True) -> RiskReport:
 
 @router.get(
     "/{system_name}/neighbors",
-    response_model=List[str],
+    response_model=list[str],
     summary="Get neighboring systems",
     description="Returns a list of systems directly connected via stargates.",
 )
-def get_system_neighbors(system_name: str) -> List[str]:
+def get_system_neighbors(system_name: str) -> list[str]:
     """Get systems connected to the specified system."""
     universe = load_universe()
     if system_name not in universe.systems:

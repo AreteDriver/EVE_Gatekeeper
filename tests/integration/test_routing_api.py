@@ -1,6 +1,5 @@
 """Integration tests for routing API endpoints."""
 
-import pytest
 
 
 class TestRouteEndpoint:

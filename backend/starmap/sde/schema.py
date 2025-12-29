@@ -7,8 +7,9 @@ This module defines the database schema for storing:
 - User data (ship configs, pilot profiles, waypoints)
 """
 
-import aiosqlite
 from pathlib import Path
+
+import aiosqlite
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 DB_NAME = "universe.db"

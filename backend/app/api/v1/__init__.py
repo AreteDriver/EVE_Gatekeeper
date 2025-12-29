@@ -2,12 +2,12 @@
 
 from fastapi import APIRouter
 
-from .systems import router as systems_router
+from .bridges import router as bridges_router
+from .jump import router as jump_router
 from .routing import router as routing_router
 from .status import router as status_router
+from .systems import router as systems_router
 from .websocket import router as websocket_router
-from .jump import router as jump_router
-from .bridges import router as bridges_router
 
 router = APIRouter(prefix="/api/v1")
 

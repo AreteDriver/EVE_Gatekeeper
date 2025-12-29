@@ -1,14 +1,14 @@
 """ESI (EVE Swagger Interface) client module."""
 
-from .client import ESIClient
 from .cache import ESICache
+from .client import ESIClient
 from .endpoints import (
-    get_system_kills,
-    get_system_jumps,
     get_incursions,
-    get_sovereignty_map,
-    get_sovereignty_campaigns,
     get_route,
+    get_sovereignty_campaigns,
+    get_sovereignty_map,
+    get_system_jumps,
+    get_system_kills,
 )
 
 __all__ = [

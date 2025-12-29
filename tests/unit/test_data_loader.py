@@ -1,8 +1,7 @@
 """Unit tests for data loader."""
 
-import pytest
 
-from backend.app.services.data_loader import load_universe, load_risk_config, get_neighbors
+from backend.app.services.data_loader import get_neighbors, load_risk_config, load_universe
 
 
 class TestLoadUniverse:

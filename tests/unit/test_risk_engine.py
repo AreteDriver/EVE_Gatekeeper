@@ -2,8 +2,8 @@
 
 import pytest
 
-from backend.app.services.risk_engine import compute_risk, risk_to_color
 from backend.app.models.risk import ZKillStats
+from backend.app.services.risk_engine import compute_risk, risk_to_color
 
 
 class TestComputeRisk:

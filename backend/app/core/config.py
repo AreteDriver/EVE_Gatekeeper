@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List, Optional
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -28,12 +27,12 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = "sqlite:///./eve_gatekeeper.db"
-    POSTGRES_URL: Optional[str] = None
+    POSTGRES_URL: str | None = None
 
     # ESI (EVE Swagger Interface)
     ESI_BASE_URL: str = "https://esi.evetech.net/latest"
-    ESI_CLIENT_ID: Optional[str] = None
-    ESI_SECRET_KEY: Optional[str] = None
+    ESI_CLIENT_ID: str | None = None
+    ESI_SECRET_KEY: str | None = None
     ESI_CALLBACK_URL: str = "http://localhost:8000/callback"
     ESI_USER_AGENT: str = "EVE_Gatekeeper/1.0 (https://github.com/AreteDriver/EVE_Gatekeeper)"
 
@@ -43,7 +42,7 @@ class Settings(BaseSettings):
     ZKILL_REDISQ_URL: str = "https://redisq.zkillboard.com/listen.php"
 
     # Redis Cache
-    REDIS_URL: Optional[str] = None
+    REDIS_URL: str | None = None
 
     # Logging
     LOG_LEVEL: str = "INFO"
@@ -54,15 +53,15 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 100
 
     # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8080"]
 
     # Security
     API_KEY_ENABLED: bool = False
-    API_KEY: Optional[str] = None
+    API_KEY: str | None = None
     SECRET_KEY: str = "change-me-in-production"
 
     # Monitoring
-    SENTRY_DSN: Optional[str] = None
+    SENTRY_DSN: str | None = None
     METRICS_ENABLED: bool = True
 
     # Cache TTLs (in seconds)

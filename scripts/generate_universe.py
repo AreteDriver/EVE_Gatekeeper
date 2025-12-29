@@ -3,8 +3,9 @@
 
 import csv
 import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 
 def get_security_category(security: float) -> str:
     """Determine security category from security status."""
@@ -18,14 +19,14 @@ def get_security_category(security: float) -> str:
 def main():
     # Load regions
     regions = {}
-    with open("/tmp/mapRegions.csv", "r") as f:
+    with open("/tmp/mapRegions.csv") as f:
         reader = csv.DictReader(f)
         for row in reader:
             regions[int(row["regionID"])] = row["regionName"]
 
     # Load constellations
     constellations = {}
-    with open("/tmp/mapConstellations.csv", "r") as f:
+    with open("/tmp/mapConstellations.csv") as f:
         reader = csv.DictReader(f)
         for row in reader:
             constellations[int(row["constellationID"])] = {
@@ -35,7 +36,7 @@ def main():
 
     # Load solar systems
     systems = {}
-    with open("/tmp/mapSolarSystems.csv", "r") as f:
+    with open("/tmp/mapSolarSystems.csv") as f:
         reader = csv.DictReader(f)
         for row in reader:
             system_id = int(row["solarSystemID"])
@@ -74,7 +75,7 @@ def main():
     gates = []
     seen_connections = set()
 
-    with open("/tmp/mapSolarSystemJumps.csv", "r") as f:
+    with open("/tmp/mapSolarSystemJumps.csv") as f:
         reader = csv.DictReader(f)
         for row in reader:
             from_id = int(row["fromSolarSystemID"])
@@ -120,7 +121,7 @@ def main():
     with open(output_path, "w") as f:
         json.dump(universe, f, indent=2)
 
-    print(f"Generated universe.json:")
+    print("Generated universe.json:")
     print(f"  - {len(systems)} solar systems")
     print(f"  - {len(gates)} stargate connections")
     print(f"  - Saved to {output_path}")

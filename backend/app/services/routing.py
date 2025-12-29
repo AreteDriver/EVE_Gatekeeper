@@ -1,10 +1,9 @@
 import math
-from typing import Set
 
-from .data_loader import load_universe, load_risk_config
+from ..models.route import RouteHop, RouteResponse
+from .data_loader import load_risk_config, load_universe
 from .jumpbridge import get_active_bridges
 from .risk_engine import compute_risk
-from ..models.route import RouteResponse, RouteHop
 
 # Edge type markers for distinguishing gates from bridges
 EDGE_GATE = "gate"
@@ -12,7 +11,7 @@ EDGE_BRIDGE = "bridge"
 
 
 def _build_graph(
-    avoid: Set[str] | None = None,
+    avoid: set[str] | None = None,
     use_bridges: bool = False,
 ) -> tuple[dict[str, dict[str, float]], dict[tuple[str, str], str]]:
     """
@@ -69,8 +68,8 @@ def _dijkstra(graph: dict[str, dict[str, float]], start: str, end: str, profile:
     profile_cfg = cfg.routing_profiles.get(profile, cfg.routing_profiles["shortest"])
     risk_factor = profile_cfg.get("risk_factor", 0.0)
 
-    dist: dict[str, float] = {node: math.inf for node in graph}
-    prev: dict[str, str | None] = {node: None for node in graph}
+    dist: dict[str, float] = dict.fromkeys(graph, math.inf)
+    prev: dict[str, str | None] = dict.fromkeys(graph)
     visited: set[str] = set()
 
     dist[start] = 0.0
@@ -109,7 +108,7 @@ def compute_route(
     from_system: str,
     to_system: str,
     profile: str = "shortest",
-    avoid: Set[str] | None = None,
+    avoid: set[str] | None = None,
     use_bridges: bool = False,
 ) -> RouteResponse:
     """
