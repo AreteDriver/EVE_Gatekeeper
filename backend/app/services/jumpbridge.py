@@ -106,13 +106,19 @@ def parse_bridge_text(text: str) -> tuple[list[JumpBridge], list[str]]:
                     break
 
                 # Create canonical key to avoid duplicates
-                key = tuple(sorted([sys1, sys2]))
+                sorted_systems = sorted([sys1, sys2])
+                key: tuple[str, str] = (sorted_systems[0], sorted_systems[1])
                 if key in seen:
                     matched = True
                     break
 
                 seen.add(key)
-                bridges.append(JumpBridge(from_system=sys1, to_system=sys2))
+                bridges.append(JumpBridge(
+                    from_system=sys1,
+                    to_system=sys2,
+                    structure_id=None,
+                    owner=None,
+                ))
                 matched = True
                 break
 

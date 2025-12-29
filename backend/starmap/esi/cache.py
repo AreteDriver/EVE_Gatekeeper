@@ -173,7 +173,8 @@ class ESICache:
         """
         async with aiosqlite.connect(self.db_path) as db:
             cursor = await db.execute("SELECT COUNT(*) FROM esi_cache")
-            total = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            total = int(row[0]) if row else 0
 
             cursor = await db.execute(
                 """
@@ -183,7 +184,8 @@ class ESICache:
                 """,
                 (datetime.utcnow().isoformat(),),
             )
-            expired = (await cursor.fetchone())[0]
+            row = await cursor.fetchone()
+            expired = int(row[0]) if row else 0
 
             cursor = await db.execute(
                 """

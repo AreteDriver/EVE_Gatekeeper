@@ -15,7 +15,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Add security headers to all responses."""
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        response = await call_next(request)
+        response: Response = await call_next(request)
 
         # Security headers
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -55,7 +55,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         # Track response time
         start_time = time.perf_counter()
 
-        response = await call_next(request)
+        response: Response = await call_next(request)
 
         # Calculate response time
         process_time = time.perf_counter() - start_time
@@ -76,10 +76,10 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
         self.max_size = max_size
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        content_length = request.headers.get("content-length")
+        content_length_str = request.headers.get("content-length")
 
-        if content_length:
-            content_length = int(content_length)
+        if content_length_str:
+            content_length = int(content_length_str)
             if content_length > self.max_size:
                 return Response(
                     content='{"error": "Request too large"}',
@@ -87,4 +87,5 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
                     media_type="application/json",
                 )
 
-        return await call_next(request)
+        response: Response = await call_next(request)
+        return response

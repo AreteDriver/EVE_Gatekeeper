@@ -159,7 +159,10 @@ async def compute_route_risks_async(
     for name in system_names:
         if name in universe.systems:
             system_id = name_to_id.get(name)
-            stats = stats_by_id.get(system_id, ZKillStats())
+            if system_id is not None:
+                stats = stats_by_id.get(system_id, ZKillStats())
+            else:
+                stats = ZKillStats()
             results[name] = _calculate_risk_score(name, stats)
 
     return results

@@ -4,7 +4,7 @@ These functions provide high-level access to ESI endpoints
 with automatic caching and error handling.
 """
 
-from typing import Any
+from typing import Any, cast
 
 from .cache import ESICache
 from .client import ESIClient
@@ -28,7 +28,7 @@ async def get_system_kills(
     if cache:
         cached = await cache.get(cache_key)
         if cached and not cached[1]:  # Not expired
-            return cached[0]
+            return cast(dict[int, dict[str, int]], cached[0])
 
     data, headers = await client.get("/universe/system_kills/")
 
@@ -65,7 +65,7 @@ async def get_system_jumps(
     if cache:
         cached = await cache.get(cache_key)
         if cached and not cached[1]:
-            return cached[0]
+            return cast(dict[int, int], cached[0])
 
     data, headers = await client.get("/universe/system_jumps/")
 
@@ -94,14 +94,14 @@ async def get_incursions(
     if cache:
         cached = await cache.get(cache_key)
         if cached and not cached[1]:
-            return cached[0]
+            return cast(list[dict[str, Any]], cached[0])
 
     data, headers = await client.get("/incursions/")
 
     if cache:
         await cache.set(cache_key, "incursions", data, etag=headers.get("etag"))
 
-    return data
+    return cast(list[dict[str, Any]], data)
 
 
 async def get_sovereignty_map(
@@ -121,7 +121,7 @@ async def get_sovereignty_map(
     if cache:
         cached = await cache.get(cache_key)
         if cached and not cached[1]:
-            return cached[0]
+            return cast(dict[int, dict[str, Any]], cached[0])
 
     data, headers = await client.get("/sovereignty/map/")
 
@@ -159,7 +159,7 @@ async def get_sovereignty_campaigns(
     if cache:
         cached = await cache.get(cache_key)
         if cached and not cached[1]:
-            return cached[0]
+            return cast(list[dict[str, Any]], cached[0])
 
     data, headers = await client.get("/sovereignty/campaigns/")
 
@@ -168,7 +168,7 @@ async def get_sovereignty_campaigns(
             cache_key, "sovereignty_campaigns", data, etag=headers.get("etag")
         )
 
-    return data
+    return cast(list[dict[str, Any]], data)
 
 
 async def get_route(
@@ -205,7 +205,7 @@ async def get_route(
 
     data, _ = await client.get(f"/route/{origin}/{destination}/", params=params)
 
-    return data
+    return cast(list[int], data)
 
 
 # ============================================================================
@@ -229,7 +229,7 @@ async def get_character_location(
         f"/characters/{character_id}/location/",
         authenticated=True,
     )
-    return data
+    return cast(dict[str, Any], data)
 
 
 async def get_character_online(
@@ -248,7 +248,7 @@ async def get_character_online(
         f"/characters/{character_id}/online/",
         authenticated=True,
     )
-    return data
+    return cast(dict[str, Any], data)
 
 
 async def set_waypoint(
@@ -293,7 +293,7 @@ async def get_character_assets(
     if cache:
         cached = await cache.get(cache_key)
         if cached and not cached[1]:
-            return cached[0]
+            return cast(list[dict[str, Any]], cached[0])
 
     data = await client.get_paginated(
         f"/characters/{character_id}/assets/",
@@ -303,7 +303,7 @@ async def get_character_assets(
     if cache:
         await cache.set(cache_key, "character_assets", data, ttl=300)
 
-    return data
+    return cast(list[dict[str, Any]], data)
 
 
 async def get_character_standings(
@@ -324,7 +324,7 @@ async def get_character_standings(
     if cache:
         cached = await cache.get(cache_key)
         if cached and not cached[1]:
-            return cached[0]
+            return cast(list[dict[str, Any]], cached[0])
 
     data, _ = await client.get(
         f"/characters/{character_id}/standings/",
@@ -334,7 +334,7 @@ async def get_character_standings(
     if cache:
         await cache.set(cache_key, "character_standings", data, ttl=3600)
 
-    return data
+    return cast(list[dict[str, Any]], data)
 
 
 # ============================================================================
@@ -360,7 +360,7 @@ async def get_type_info(
     if cache:
         cached = await cache.get(cache_key)
         if cached and not cached[1]:
-            return cached[0]
+            return cast(dict[str, Any], cached[0])
 
     data, headers = await client.get(f"/universe/types/{type_id}/")
 
@@ -373,7 +373,7 @@ async def get_type_info(
             etag=headers.get("etag"),
         )
 
-    return data
+    return cast(dict[str, Any], data)
 
 
 async def search_universe(
@@ -405,4 +405,4 @@ async def search_universe(
     }
 
     data, _ = await client.get("/search/", params=params)
-    return data
+    return cast(dict[str, list[int]], data)

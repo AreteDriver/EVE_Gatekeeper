@@ -83,7 +83,7 @@ class MemoryCacheService(CacheService):
         for cache in self._caches.values():
             if key in cache:
                 self._hits += 1
-                return cache[key]
+                return str(cache[key])
         self._misses += 1
         return None
 
@@ -147,9 +147,10 @@ class RedisCacheService(CacheService):
             value = await self._redis.get(key)
             if value is not None:
                 self._hits += 1
+                return str(value)
             else:
                 self._misses += 1
-            return value
+            return None
         except Exception as e:
             logger.warning(f"Redis get failed for key {key}: {e}")
             self._misses += 1
@@ -168,7 +169,7 @@ class RedisCacheService(CacheService):
         """Delete key from Redis."""
         try:
             result = await self._redis.delete(key)
-            return result > 0
+            return int(result) > 0
         except Exception as e:
             logger.warning(f"Redis delete failed for key {key}: {e}")
             return False
@@ -176,7 +177,7 @@ class RedisCacheService(CacheService):
     async def exists(self, key: str) -> bool:
         """Check if key exists in Redis."""
         try:
-            return await self._redis.exists(key) > 0
+            return int(await self._redis.exists(key)) > 0
         except Exception as e:
             logger.warning(f"Redis exists check failed for key {key}: {e}")
             return False
@@ -193,7 +194,7 @@ class RedisCacheService(CacheService):
     async def ping(self) -> bool:
         """Check if Redis is connected."""
         try:
-            return await self._redis.ping()
+            return bool(await self._redis.ping())
         except Exception:
             return False
 

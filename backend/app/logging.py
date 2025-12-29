@@ -102,7 +102,8 @@ def configure_logging() -> None:
 
 def get_logger(name: str = __name__) -> structlog.stdlib.BoundLogger:
     """Get a structured logger instance."""
-    return structlog.get_logger(name)
+    logger: structlog.stdlib.BoundLogger = structlog.get_logger(name)
+    return logger
 
 
 class LoggingMiddleware:

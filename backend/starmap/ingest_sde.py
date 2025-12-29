@@ -105,29 +105,34 @@ def classify_security(security_status: float, is_wormhole: bool = False) -> str:
 async def fetch_all_regions(client: ESIClient) -> list[int]:
     """Fetch list of all region IDs."""
     print("Fetching region list...")
-    return await client.get("/universe/regions/")
+    result: list[int] = await client.get("/universe/regions/")
+    return result
 
 
 async def fetch_region_details(client: ESIClient, region_id: int) -> dict[str, Any]:
     """Fetch details for a single region."""
-    return await client.get(f"/universe/regions/{region_id}/")
+    result: dict[str, Any] = await client.get(f"/universe/regions/{region_id}/")
+    return result
 
 
 async def fetch_constellation_details(
     client: ESIClient, constellation_id: int
 ) -> dict[str, Any]:
     """Fetch details for a single constellation."""
-    return await client.get(f"/universe/constellations/{constellation_id}/")
+    result: dict[str, Any] = await client.get(f"/universe/constellations/{constellation_id}/")
+    return result
 
 
 async def fetch_system_details(client: ESIClient, system_id: int) -> dict[str, Any]:
     """Fetch details for a single solar system."""
-    return await client.get(f"/universe/systems/{system_id}/")
+    result: dict[str, Any] = await client.get(f"/universe/systems/{system_id}/")
+    return result
 
 
 async def fetch_stargate_details(client: ESIClient, stargate_id: int) -> dict[str, Any]:
     """Fetch details for a single stargate."""
-    return await client.get(f"/universe/stargates/{stargate_id}/")
+    result: dict[str, Any] = await client.get(f"/universe/stargates/{stargate_id}/")
+    return result
 
 
 async def ingest_regions(
@@ -145,7 +150,7 @@ async def ingest_regions(
 
     insert_count = 0
     for rid, result in zip(region_ids, results, strict=False):
-        if isinstance(result, Exception):
+        if isinstance(result, BaseException):
             print(f"  Error fetching region {rid}: {result}")
             continue
 
@@ -205,7 +210,7 @@ async def ingest_constellations(
 
     insert_count = 0
     for cid, result in zip(constellation_ids, results, strict=False):
-        if isinstance(result, Exception):
+        if isinstance(result, BaseException):
             print(f"  Error fetching constellation {cid}: {result}")
             continue
 
@@ -271,7 +276,7 @@ async def ingest_systems(
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         for sid, result in zip(chunk, results, strict=False):
-            if isinstance(result, Exception):
+            if isinstance(result, BaseException):
                 print(f"  Error fetching system {sid}: {result}")
                 continue
 
@@ -359,8 +364,8 @@ async def ingest_stargates(
         tasks = [fetch_stargate_details(client, gid) for gid in chunk]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        for _gid, result in zip(chunk, results, strict=False):
-            if isinstance(result, Exception):
+        for _, result in zip(chunk, results, strict=False):
+            if isinstance(result, BaseException):
                 # Some stargates may not exist (wormhole systems, etc.)
                 continue
 
@@ -470,7 +475,8 @@ async def compute_statistics(db: aiosqlite.Connection) -> None:
     for label, query in queries:
         cursor = await db.execute(query)
         row = await cursor.fetchone()
-        print(f"  {label}: {row[0]:,}")
+        count = row[0] if row else 0
+        print(f"  {label}: {count:,}")
 
 
 async def main_async(reset: bool = False, skip_stargates: bool = False) -> None:

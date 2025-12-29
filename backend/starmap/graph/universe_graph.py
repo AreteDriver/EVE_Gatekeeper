@@ -96,6 +96,7 @@ class UniverseGraph:
     async def get_neighbors(self, system_id: int) -> list[SolarSystem]:
         """Get directly connected systems."""
         await self._ensure_loaded()
+        assert self._adjacency is not None  # Set by _ensure_loaded
 
         neighbor_ids = self._adjacency.get(system_id, [])
         neighbors = []
@@ -410,37 +411,37 @@ class UniverseGraph:
     async def get_statistics(self) -> dict[str, Any]:
         """Get universe statistics."""
         async with aiosqlite.connect(self.db_path) as db:
-            stats = {}
+            stats: dict[str, Any] = {}
+
+            # Helper to safely fetch count
+            async def fetch_count(query: str) -> int:
+                cursor = await db.execute(query)
+                row = await cursor.fetchone()
+                return int(row[0]) if row else 0
 
             # System counts
-            cursor = await db.execute("SELECT COUNT(*) FROM solar_systems")
-            stats["total_systems"] = (await cursor.fetchone())[0]
-
-            cursor = await db.execute(
+            stats["total_systems"] = await fetch_count(
+                "SELECT COUNT(*) FROM solar_systems"
+            )
+            stats["highsec_systems"] = await fetch_count(
                 "SELECT COUNT(*) FROM solar_systems WHERE security_class = 'highsec'"
             )
-            stats["highsec_systems"] = (await cursor.fetchone())[0]
-
-            cursor = await db.execute(
+            stats["lowsec_systems"] = await fetch_count(
                 "SELECT COUNT(*) FROM solar_systems WHERE security_class = 'lowsec'"
             )
-            stats["lowsec_systems"] = (await cursor.fetchone())[0]
-
-            cursor = await db.execute(
+            stats["nullsec_systems"] = await fetch_count(
                 "SELECT COUNT(*) FROM solar_systems WHERE security_class = 'nullsec'"
             )
-            stats["nullsec_systems"] = (await cursor.fetchone())[0]
-
-            cursor = await db.execute(
+            stats["wormhole_systems"] = await fetch_count(
                 "SELECT COUNT(*) FROM solar_systems WHERE is_wormhole = 1"
             )
-            stats["wormhole_systems"] = (await cursor.fetchone())[0]
 
             # Connection counts
-            cursor = await db.execute("SELECT COUNT(*) FROM system_connections")
-            stats["total_connections"] = (await cursor.fetchone())[0]
-
-            cursor = await db.execute("SELECT COUNT(*) FROM regions")
-            stats["total_regions"] = (await cursor.fetchone())[0]
+            stats["total_connections"] = await fetch_count(
+                "SELECT COUNT(*) FROM system_connections"
+            )
+            stats["total_regions"] = await fetch_count(
+                "SELECT COUNT(*) FROM regions"
+            )
 
             return stats

@@ -64,13 +64,13 @@ class SolarSystem(BaseModel):
 
     model_config = {"from_attributes": True}
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def display_security(self) -> str:
         """Human-readable security status."""
         return f"{self.security_status:.1f}"
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def sec_class(self) -> str:
         """Computed security class if not set."""
@@ -112,7 +112,7 @@ class SystemConnection(BaseModel):
 
     model_config = {"from_attributes": True}
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def total_weight(self) -> float:
         """Total edge weight for pathfinding."""
@@ -133,13 +133,13 @@ class SystemStats(BaseModel):
 
     model_config = {"from_attributes": True}
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def total_kills(self) -> int:
         """Total PvP kills (ships + pods)."""
         return self.ship_kills + self.pod_kills
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def danger_level(self) -> str:
         """Categorical danger level based on kills."""
@@ -226,7 +226,7 @@ class ShipConfig(BaseModel):
 
     model_config = {"from_attributes": True}
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def computed_range(self) -> float:
         """Compute effective jump range with skills.
@@ -238,7 +238,7 @@ class ShipConfig(BaseModel):
         jdc_bonus = 1.0 + (self.jump_drive_calibration_level * 0.25)
         return self.jump_drive_range * jdc_bonus
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def fuel_per_ly(self) -> float:
         """Compute fuel consumption per LY with skills.
