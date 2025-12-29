@@ -1,0 +1,28 @@
+{
+  "networks": [
+    {
+      "name": "NewNetwork",
+      "bridges": [
+        {
+          "from_system": "Jita",
+          "to_system": "Perimeter",
+          "structure_id": null,
+          "owner": null
+        }
+      ],
+      "enabled": true
+    },
+    {
+      "name": "TestNetwork",
+      "bridges": [
+        {
+          "from_system": "Jita",
+          "to_system": "Perimeter",
+          "structure_id": null,
+          "owner": null
+        }
+      ],
+      "enabled": true
+    }
+  ]
+}

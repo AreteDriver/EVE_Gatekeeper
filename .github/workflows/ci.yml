@@ -68,7 +68,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest --cov=backend/app --cov-report=xml --cov-report=term-missing
+          PYTHONPATH=. pytest --cov=backend/app --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -93,7 +93,7 @@ jobs:
         run: pip install pip-audit
 
       - name: Run security audit
-        run: pip-audit -r backend/requirements.txt --ignore-vuln GHSA-XXXX-XXXX-XXXX || true
+        run: pip-audit -r backend/requirements.txt || true
 
   build:
     name: Build Docker

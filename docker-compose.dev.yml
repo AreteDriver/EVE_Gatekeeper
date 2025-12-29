@@ -1,4 +1,5 @@
-version: '3.8'
+# Development overrides for EVE Gatekeeper
+# Note: 'version' is obsolete in Docker Compose V2+
 
 # Development overrides - use with:
 # docker-compose -f docker-compose.yml -f docker-compose.dev.yml up

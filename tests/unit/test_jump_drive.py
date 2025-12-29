@@ -226,3 +226,207 @@ class TestShipFuelConsumption:
     def test_blops_fuel(self):
         """Black ops should use 300 fuel per LY."""
         assert SHIP_FUEL_PER_LY[CapitalShipType.BLOPS] == 300
+
+
+class TestCalculateDistanceLy:
+    """Tests for calculate_distance_ly function."""
+
+    def test_same_system(self):
+        """Same system should have 0 distance."""
+        from backend.app.services.jump_drive import calculate_distance_ly
+        distance = calculate_distance_ly("Jita", "Jita")
+        assert distance == 0.0
+
+    def test_known_systems(self):
+        """Should calculate distance between known systems."""
+        from backend.app.services.jump_drive import calculate_distance_ly
+        distance = calculate_distance_ly("Jita", "Amarr")
+        assert distance > 0
+        assert distance < 100  # Reasonable max
+
+    def test_unknown_from_system(self):
+        """Should raise error for unknown from system."""
+        from backend.app.services.jump_drive import calculate_distance_ly
+        with pytest.raises(ValueError, match="Unknown system"):
+            calculate_distance_ly("FakeSystem123", "Jita")
+
+    def test_unknown_to_system(self):
+        """Should raise error for unknown to system."""
+        from backend.app.services.jump_drive import calculate_distance_ly
+        with pytest.raises(ValueError, match="Unknown system"):
+            calculate_distance_ly("Jita", "FakeSystem123")
+
+
+class TestFindSystemsInRange:
+    """Tests for find_systems_in_range function."""
+
+    def test_returns_list(self):
+        """Should return list of systems."""
+        from backend.app.services.jump_drive import find_systems_in_range
+        systems = find_systems_in_range("Jita", 10.0)
+        assert isinstance(systems, list)
+
+    def test_systems_within_range(self):
+        """All systems should be within specified range."""
+        from backend.app.services.jump_drive import find_systems_in_range
+        max_range = 5.0
+        systems = find_systems_in_range("Jita", max_range)
+        for system in systems:
+            assert system.distance_ly <= max_range
+
+    def test_sorted_by_distance(self):
+        """Systems should be sorted by distance."""
+        from backend.app.services.jump_drive import find_systems_in_range
+        systems = find_systems_in_range("Jita", 10.0)
+        if len(systems) >= 2:
+            for i in range(len(systems) - 1):
+                assert systems[i].distance_ly <= systems[i + 1].distance_ly
+
+    def test_security_filter_lowsec(self):
+        """Should filter for lowsec only."""
+        from backend.app.services.jump_drive import find_systems_in_range
+        systems = find_systems_in_range("Jita", 20.0, security_filter="lowsec")
+        for system in systems:
+            assert system.category == "lowsec"
+
+    def test_security_filter_nullsec(self):
+        """Should filter for nullsec only."""
+        from backend.app.services.jump_drive import find_systems_in_range
+        systems = find_systems_in_range("Jita", 30.0, security_filter="nullsec")
+        for system in systems:
+            assert system.category == "nullsec"
+
+    def test_unknown_origin(self):
+        """Should raise error for unknown origin."""
+        from backend.app.services.jump_drive import find_systems_in_range
+        with pytest.raises(ValueError, match="Unknown system"):
+            find_systems_in_range("FakeSystem123", 10.0)
+
+
+class TestPlanJumpRoute:
+    """Tests for plan_jump_route function."""
+
+    def test_route_between_known_systems(self):
+        """Should plan route between known systems."""
+        from backend.app.services.jump_drive import plan_jump_route
+        route = plan_jump_route("Jita", "Amarr", CapitalShipType.JUMP_FREIGHTER)
+        assert route.from_system == "Jita"
+        assert route.to_system == "Amarr"
+        assert len(route.legs) >= 1
+
+    def test_route_has_fuel_info(self):
+        """Route should have fuel information."""
+        from backend.app.services.jump_drive import plan_jump_route
+        route = plan_jump_route("Jita", "Amarr", CapitalShipType.CARRIER)
+        assert route.total_fuel > 0
+
+    def test_route_has_distance(self):
+        """Route should have distance information."""
+        from backend.app.services.jump_drive import plan_jump_route
+        route = plan_jump_route("Jita", "Amarr", CapitalShipType.CARRIER)
+        assert route.total_distance_ly > 0
+
+    def test_route_first_leg_starts_at_origin(self):
+        """First leg should start at origin."""
+        from backend.app.services.jump_drive import plan_jump_route
+        route = plan_jump_route("Jita", "Amarr", CapitalShipType.CARRIER)
+        assert route.legs[0].from_system == "Jita"
+
+    def test_route_last_leg_ends_at_destination(self):
+        """Last leg should end at destination."""
+        from backend.app.services.jump_drive import plan_jump_route
+        route = plan_jump_route("Jita", "Amarr", CapitalShipType.CARRIER)
+        assert route.legs[-1].to_system == "Amarr"
+
+    def test_route_total_fuel_matches_legs(self):
+        """Total fuel should equal sum of leg fuel."""
+        from backend.app.services.jump_drive import plan_jump_route
+        route = plan_jump_route("Jita", "Amarr", CapitalShipType.CARRIER)
+        leg_fuel_sum = sum(leg.fuel_required for leg in route.legs)
+        assert route.total_fuel == leg_fuel_sum
+
+    def test_different_ship_types_different_fuel(self):
+        """Different ships should use different fuel."""
+        from backend.app.services.jump_drive import plan_jump_route
+        jf_route = plan_jump_route("Jita", "Amarr", CapitalShipType.JUMP_FREIGHTER)
+        titan_route = plan_jump_route("Jita", "Amarr", CapitalShipType.TITAN)
+        # Titan uses more fuel per LY
+        assert titan_route.total_fuel > jf_route.total_fuel
+
+    def test_route_ship_type_in_result(self):
+        """Ship type should be in the result."""
+        from backend.app.services.jump_drive import plan_jump_route
+        route = plan_jump_route("Jita", "Amarr", CapitalShipType.CARRIER)
+        assert route.ship_type == "carrier"
+
+
+class TestJumpDataclasses:
+    """Tests for jump-related dataclasses."""
+
+    def test_jump_range_creation(self):
+        """Should create JumpRange dataclass."""
+        jr = JumpRange(
+            base_range_ly=5.0,
+            max_range_ly=11.25,
+            jdc_level=5,
+            jfc_level=4,
+            fuel_per_ly=600,
+        )
+        assert jr.base_range_ly == 5.0
+        assert jr.max_range_ly == 11.25
+
+    def test_system_in_range_creation(self):
+        """Should create SystemInRange dataclass."""
+        from backend.app.services.jump_drive import SystemInRange
+        sir = SystemInRange(
+            name="Jita",
+            system_id=30000142,
+            distance_ly=5.5,
+            security=0.9,
+            category="highsec",
+            has_npc_station=True,
+            fuel_required=3000,
+        )
+        assert sir.name == "Jita"
+        assert sir.system_id == 30000142
+
+    def test_jump_leg_creation(self):
+        """Should create JumpLeg dataclass."""
+        from backend.app.services.jump_drive import JumpLeg
+        leg = JumpLeg(
+            from_system="Jita",
+            to_system="Amarr",
+            distance_ly=10.5,
+            fuel_required=6300,
+            fatigue_added_minutes=105.0,
+            total_fatigue_minutes=105.0,
+            wait_time_minutes=10.5,
+        )
+        assert leg.from_system == "Jita"
+        assert leg.fuel_required == 6300
+
+    def test_jump_route_creation(self):
+        """Should create JumpRoute dataclass."""
+        from backend.app.services.jump_drive import JumpLeg, JumpRoute
+        leg = JumpLeg(
+            from_system="A",
+            to_system="B",
+            distance_ly=5.0,
+            fuel_required=3000,
+            fatigue_added_minutes=50.0,
+            total_fatigue_minutes=50.0,
+            wait_time_minutes=5.0,
+        )
+        route = JumpRoute(
+            from_system="A",
+            to_system="C",
+            ship_type="jump_freighter",
+            total_jumps=2,
+            total_distance_ly=10.0,
+            total_fuel=6000,
+            total_fatigue_minutes=100.0,
+            total_travel_time_minutes=10.0,
+            legs=[leg, leg],
+        )
+        assert route.total_jumps == 2
+        assert len(route.legs) == 2

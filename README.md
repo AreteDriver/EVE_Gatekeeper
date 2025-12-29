@@ -101,6 +101,31 @@ EVE_Gatekeeper/
 | `/api/v1/status/` | GET | Detailed API status |
 | `/api/v1/ws/killfeed` | WS | Real-time kill feed |
 
+### Jump Drive API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/jump/range` | GET | Calculate jump range for ship type |
+| `/api/v1/jump/distance` | GET | Calculate LY distance between systems |
+| `/api/v1/jump/systems-in-range` | GET | Find cyno systems within range |
+| `/api/v1/jump/route` | GET | Plan multi-leg capital route |
+
+### Jump Bridges API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/bridges/` | GET | List configured bridge networks |
+| `/api/v1/bridges/import` | POST | Import bridges from text |
+| `/api/v1/bridges/{name}` | GET | Get network details |
+| `/api/v1/bridges/{name}` | PATCH | Toggle network enabled/disabled |
+| `/api/v1/bridges/{name}` | DELETE | Delete a network |
+
+### Route Comparison API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/route/compare` | POST | Compare routes across profiles |
+
 ### Utility Endpoints
 
 | Endpoint | Method | Description |
