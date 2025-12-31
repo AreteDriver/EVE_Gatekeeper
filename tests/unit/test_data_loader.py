@@ -1,6 +1,5 @@
 """Unit tests for data loader."""
 
-
 from backend.app.services.data_loader import get_neighbors, load_risk_config, load_universe
 
 
@@ -83,7 +82,9 @@ class TestGetNeighbors:
 
         assert len(neighbors) >= 1
         # Jita should connect to Perimeter
-        neighbor_systems = [g.to_system if g.from_system == "Jita" else g.from_system for g in neighbors]
+        neighbor_systems = [
+            g.to_system if g.from_system == "Jita" else g.from_system for g in neighbors
+        ]
         assert "Perimeter" in neighbor_systems
 
     def test_get_neighbors_perimeter(self):

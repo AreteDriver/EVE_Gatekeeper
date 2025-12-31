@@ -136,6 +136,7 @@ class ZKillListener:
 
             # Get system name from our data
             from .data_loader import load_universe
+
             universe = load_universe()
             system_name = None
             region_id = None

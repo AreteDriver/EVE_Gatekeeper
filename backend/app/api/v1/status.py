@@ -38,6 +38,7 @@ async def get_status() -> dict[str, Any]:
     database_status = "ok"
     try:
         from ...services.data_loader import load_universe
+
         universe = load_universe()
         system_count = len(universe.systems)
     except Exception:

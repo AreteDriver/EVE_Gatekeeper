@@ -1,7 +1,6 @@
 """Integration tests for health check endpoint."""
 
 
-
 class TestHealthEndpoint:
     """Tests for /health endpoint."""
 

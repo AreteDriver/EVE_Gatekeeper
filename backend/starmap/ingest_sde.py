@@ -115,9 +115,7 @@ async def fetch_region_details(client: ESIClient, region_id: int) -> dict[str, A
     return result
 
 
-async def fetch_constellation_details(
-    client: ESIClient, constellation_id: int
-) -> dict[str, Any]:
+async def fetch_constellation_details(client: ESIClient, constellation_id: int) -> dict[str, Any]:
     """Fetch details for a single constellation."""
     result: dict[str, Any] = await client.get(f"/universe/constellations/{constellation_id}/")
     return result
@@ -135,9 +133,7 @@ async def fetch_stargate_details(client: ESIClient, stargate_id: int) -> dict[st
     return result
 
 
-async def ingest_regions(
-    db: aiosqlite.Connection, client: ESIClient
-) -> dict[int, dict[str, Any]]:
+async def ingest_regions(db: aiosqlite.Connection, client: ESIClient) -> dict[int, dict[str, Any]]:
     """Fetch and insert all regions."""
     print("\n=== Ingesting Regions ===")
 
@@ -298,7 +294,9 @@ async def ingest_systems(
             # Check for Pochven (Triglavian space)
             is_pochven = result.get("constellation_id") in [
                 # Pochven constellation IDs
-                20000837, 20000838, 20000839,  # Placeholder - will be updated
+                20000837,
+                20000838,
+                20000839,  # Placeholder - will be updated
             ]
 
             await db.execute(
@@ -410,9 +408,7 @@ async def ingest_stargates(
     print(f"\nBuilding connection graph with {len(connections)} edges...")
 
     # Precompute security weights
-    cursor = await db.execute(
-        "SELECT system_id, security_status FROM solar_systems"
-    )
+    cursor = await db.execute("SELECT system_id, security_status FROM solar_systems")
     security_map = {row[0]: row[1] for row in await cursor.fetchall()}
 
     for from_sys, to_sys in connections:
@@ -518,9 +514,7 @@ async def main_async(reset: bool = False, skip_stargates: bool = False) -> None:
 
 def main() -> None:
     """Entry point for CLI."""
-    parser = argparse.ArgumentParser(
-        description="Ingest EVE Online SDE data into SQLite"
-    )
+    parser = argparse.ArgumentParser(description="Ingest EVE Online SDE data into SQLite")
     parser.add_argument(
         "--reset",
         action="store_true",

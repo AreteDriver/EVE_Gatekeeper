@@ -1,7 +1,6 @@
 """Integration tests for systems API endpoints."""
 
 
-
 class TestSystemsListEndpoint:
     """Tests for /api/v1/systems/ endpoint."""
 

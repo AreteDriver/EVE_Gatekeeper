@@ -78,9 +78,9 @@ def parse_bridge_text(text: str) -> tuple[list[JumpBridge], list[str]]:
     # Patterns for different formats
     patterns = [
         r"^\s*(.+?)\s*<->\s*(.+?)\s*$",  # System1 <-> System2
-        r"^\s*(.+?)\s*<>\s*(.+?)\s*$",   # System1 <> System2
+        r"^\s*(.+?)\s*<>\s*(.+?)\s*$",  # System1 <> System2
         r"^\s*(.+?)\s*-->\s*(.+?)\s*$",  # System1 --> System2
-        r"^\s*(.+?)\s*-\s*(.+?)\s*$",    # System1 - System2
+        r"^\s*(.+?)\s*-\s*(.+?)\s*$",  # System1 - System2
     ]
 
     for line_num, line in enumerate(text.strip().split("\n"), 1):
@@ -113,12 +113,14 @@ def parse_bridge_text(text: str) -> tuple[list[JumpBridge], list[str]]:
                     break
 
                 seen.add(key)
-                bridges.append(JumpBridge(
-                    from_system=sys1,
-                    to_system=sys2,
-                    structure_id=None,
-                    owner=None,
-                ))
+                bridges.append(
+                    JumpBridge(
+                        from_system=sys1,
+                        to_system=sys2,
+                        structure_id=None,
+                        owner=None,
+                    )
+                )
                 matched = True
                 break
 
@@ -162,8 +164,7 @@ def import_bridges(
         else:
             # Merge: add new bridges, skip duplicates
             existing_keys = {
-                tuple(sorted([b.from_system, b.to_system]))
-                for b in existing_network.bridges
+                tuple(sorted([b.from_system, b.to_system])) for b in existing_network.bridges
             }
             for bridge in bridges:
                 key = tuple(sorted([bridge.from_system, bridge.to_system]))
@@ -171,11 +172,13 @@ def import_bridges(
                     existing_network.bridges.append(bridge)
                     existing_keys.add(key)
     else:
-        config.networks.append(JumpBridgeNetwork(
-            name=network_name,
-            bridges=bridges,
-            enabled=True,
-        ))
+        config.networks.append(
+            JumpBridgeNetwork(
+                name=network_name,
+                bridges=bridges,
+                enabled=True,
+            )
+        )
 
     # Save config
     save_bridge_config(config)

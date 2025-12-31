@@ -38,7 +38,9 @@ class SolarSystem(Base):
     region_id: Mapped[int] = mapped_column(Integer, ForeignKey("regions.id"), nullable=False)
     constellation_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     security_status: Mapped[float] = mapped_column(Float, nullable=False)
-    security_class: Mapped[str] = mapped_column(String(20), nullable=False)  # highsec, lowsec, nullsec, wh
+    security_class: Mapped[str] = mapped_column(
+        String(20), nullable=False
+    )  # highsec, lowsec, nullsec, wh
     position_x: Mapped[float] = mapped_column(Float, nullable=False)
     position_y: Mapped[float] = mapped_column(Float, nullable=False)
     position_z: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -56,9 +58,7 @@ class SolarSystem(Base):
         back_populates="destination_system",
     )
 
-    __table_args__ = (
-        Index("ix_solar_systems_region_security", "region_id", "security_class"),
-    )
+    __table_args__ = (Index("ix_solar_systems_region_security", "region_id", "security_class"),)
 
     def __repr__(self) -> str:
         return f"<SolarSystem(id={self.id}, name={self.name}, security={self.security_status})>"
@@ -117,9 +117,7 @@ class KillRecord(Base):
         default=lambda: datetime.now(UTC),
     )
 
-    __table_args__ = (
-        Index("ix_kill_records_system_time", "system_id", "kill_time"),
-    )
+    __table_args__ = (Index("ix_kill_records_system_time", "system_id", "kill_time"),)
 
     def __repr__(self) -> str:
         return f"<KillRecord(id={self.id}, system={self.system_id})>"
@@ -138,9 +136,7 @@ class CacheEntry(Base):
         default=lambda: datetime.now(UTC),
     )
 
-    __table_args__ = (
-        Index("ix_cache_entries_expires", "expires_at"),
-    )
+    __table_args__ = (Index("ix_cache_entries_expires", "expires_at"),)
 
     def __repr__(self) -> str:
         return f"<CacheEntry(key={self.key})>"

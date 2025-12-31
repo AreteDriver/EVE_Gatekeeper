@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Base(DeclarativeBase):
     """Base class for SQLAlchemy models."""
+
     pass
 
 
@@ -43,7 +44,9 @@ def get_engine():
     global _engine
     if _engine is None:
         database_url = get_database_url()
-        logger.info(f"Creating database engine for: {database_url.split('@')[-1] if '@' in database_url else database_url}")
+        logger.info(
+            f"Creating database engine for: {database_url.split('@')[-1] if '@' in database_url else database_url}"
+        )
 
         # Engine configuration
         engine_kwargs = {
@@ -53,16 +56,19 @@ def get_engine():
 
         # PostgreSQL-specific settings
         if "postgresql" in database_url:
-            engine_kwargs.update({
-                "pool_size": 5,
-                "max_overflow": 10,
-                "pool_recycle": 3600,  # Recycle connections after 1 hour
-            })
+            engine_kwargs.update(
+                {
+                    "pool_size": 5,
+                    "max_overflow": 10,
+                    "pool_recycle": 3600,  # Recycle connections after 1 hour
+                }
+            )
 
         _engine = create_async_engine(database_url, **engine_kwargs)
 
         # SQLite-specific settings (enable foreign keys)
         if "sqlite" in database_url:
+
             @event.listens_for(_engine.sync_engine, "connect")
             def set_sqlite_pragma(dbapi_connection, connection_record):
                 cursor = dbapi_connection.cursor()

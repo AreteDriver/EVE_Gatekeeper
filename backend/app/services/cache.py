@@ -124,7 +124,9 @@ class MemoryCacheService(CacheService):
             "entries": total_entries,
             "hits": self._hits,
             "misses": self._misses,
-            "hit_ratio": self._hits / (self._hits + self._misses) if (self._hits + self._misses) > 0 else 0,
+            "hit_ratio": self._hits / (self._hits + self._misses)
+            if (self._hits + self._misses) > 0
+            else 0,
         }
 
 
@@ -133,6 +135,7 @@ class RedisCacheService(CacheService):
 
     def __init__(self, redis_url: str):
         import redis.asyncio as aioredis
+
         self._redis = aioredis.from_url(
             redis_url,
             encoding="utf-8",
@@ -208,7 +211,9 @@ class RedisCacheService(CacheService):
             "type": "redis",
             "hits": self._hits,
             "misses": self._misses,
-            "hit_ratio": self._hits / (self._hits + self._misses) if (self._hits + self._misses) > 0 else 0,
+            "hit_ratio": self._hits / (self._hits + self._misses)
+            if (self._hits + self._misses) > 0
+            else 0,
         }
 
 

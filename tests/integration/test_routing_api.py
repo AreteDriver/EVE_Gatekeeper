@@ -1,7 +1,6 @@
 """Integration tests for routing API endpoints."""
 
 
-
 class TestRouteEndpoint:
     """Tests for /api/v1/route/ endpoint."""
 

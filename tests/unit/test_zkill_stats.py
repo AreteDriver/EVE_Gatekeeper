@@ -76,7 +76,7 @@ class TestZKillStatsPreloader:
         """Start should set running flag."""
         preloader = ZKillStatsPreloader()
 
-        with patch.object(preloader, '_preload_loop', new_callable=AsyncMock):
+        with patch.object(preloader, "_preload_loop", new_callable=AsyncMock):
             await preloader.start()
             assert preloader._running is True
             await preloader.stop()
@@ -86,7 +86,7 @@ class TestZKillStatsPreloader:
         """Multiple starts should be safe."""
         preloader = ZKillStatsPreloader()
 
-        with patch.object(preloader, '_preload_loop', new_callable=AsyncMock):
+        with patch.object(preloader, "_preload_loop", new_callable=AsyncMock):
             await preloader.start()
             await preloader.start()  # Should not error
             assert preloader._running is True
@@ -97,7 +97,7 @@ class TestZKillStatsPreloader:
         """Stop should clear running flag."""
         preloader = ZKillStatsPreloader()
 
-        with patch.object(preloader, '_preload_loop', new_callable=AsyncMock):
+        with patch.object(preloader, "_preload_loop", new_callable=AsyncMock):
             await preloader.start()
             await preloader.stop()
             assert preloader._running is False

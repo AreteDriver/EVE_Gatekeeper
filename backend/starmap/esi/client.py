@@ -107,17 +107,13 @@ class ESIClient:
         if remain is not None:
             self._error_limit_remain = int(remain)
         if reset is not None:
-            self._error_limit_reset = datetime.utcnow() + timedelta(
-                seconds=int(reset)
-            )
+            self._error_limit_reset = datetime.utcnow() + timedelta(seconds=int(reset))
 
     async def _wait_if_rate_limited(self) -> None:
         """Wait if we're approaching the error limit."""
         if self._error_limit_remain < ERROR_LIMIT_REMAIN_THRESHOLD:
             if self._error_limit_reset:
-                wait_seconds = (
-                    self._error_limit_reset - datetime.utcnow()
-                ).total_seconds()
+                wait_seconds = (self._error_limit_reset - datetime.utcnow()).total_seconds()
                 if wait_seconds > 0:
                     await asyncio.sleep(min(wait_seconds, 60))
 
@@ -159,9 +155,7 @@ class ESIClient:
                 await self._ensure_token_valid()
                 headers["Authorization"] = f"Bearer {self._token.access_token}"
 
-            response = await self.client.get(
-                endpoint, params=request_params, headers=headers
-            )
+            response = await self.client.get(endpoint, params=request_params, headers=headers)
             self._update_error_limits(response)
 
             # Handle errors
@@ -307,8 +301,7 @@ class ESIClient:
         self._token = TokenData(
             access_token=token_data["access_token"],
             refresh_token=token_data["refresh_token"],
-            expires_at=datetime.utcnow()
-            + timedelta(seconds=token_data["expires_in"] - 60),
+            expires_at=datetime.utcnow() + timedelta(seconds=token_data["expires_in"] - 60),
             character_id=verify_data["CharacterID"],
             character_name=verify_data["CharacterName"],
             scopes=verify_data.get("Scopes", "").split(" "),

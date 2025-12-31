@@ -105,6 +105,7 @@ async def startup_event():
 
     # Start zKillboard listener for real-time kill feed
     from .services.zkill_listener import get_zkill_listener
+
     listener = get_zkill_listener()
     await listener.start()
 
@@ -114,11 +115,13 @@ async def shutdown_event():
     """Cleanup on application shutdown."""
     # Stop zKillboard listener
     from .services.zkill_listener import get_zkill_listener
+
     listener = get_zkill_listener()
     await listener.stop()
 
     # Close database connections
     from .db.database import close_db
+
     await close_db()
 
 
@@ -135,6 +138,7 @@ async def health_check() -> dict[str, Any]:
     database_status = "ok"
     try:
         from .services.data_loader import load_universe
+
         universe = load_universe()
         if not universe.systems:
             database_status = "warning"
@@ -146,6 +150,7 @@ async def health_check() -> dict[str, Any]:
     if settings.REDIS_URL:
         try:
             from .services.cache import get_cache_sync
+
             cache = get_cache_sync()
             cache_status = "redis" if hasattr(cache, "_redis") else "memory"
         except Exception:

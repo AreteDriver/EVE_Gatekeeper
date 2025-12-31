@@ -9,6 +9,7 @@ from .data_loader import load_universe
 
 class CapitalShipType(str, Enum):
     """Capital ship types with jump drives."""
+
     JUMP_FREIGHTER = "jump_freighter"
     CARRIER = "carrier"
     DREADNOUGHT = "dreadnought"
@@ -52,6 +53,7 @@ LY_CONVERSION = 1.057
 @dataclass
 class JumpRange:
     """Jump range calculation result."""
+
     base_range_ly: float
     max_range_ly: float
     jdc_level: int
@@ -62,6 +64,7 @@ class JumpRange:
 @dataclass
 class SystemInRange:
     """A system within jump range."""
+
     name: str
     system_id: int
     distance_ly: float
@@ -74,6 +77,7 @@ class SystemInRange:
 @dataclass
 class JumpLeg:
     """A single jump in a capital route."""
+
     from_system: str
     to_system: str
     distance_ly: float
@@ -86,6 +90,7 @@ class JumpLeg:
 @dataclass
 class JumpRoute:
     """Complete jump route for a capital ship."""
+
     from_system: str
     to_system: str
     ship_type: str
@@ -206,15 +211,17 @@ def find_systems_in_range(
         distance_ly = norm_dist * LY_CONVERSION
 
         if distance_ly <= max_range_ly:
-            results.append(SystemInRange(
-                name=name,
-                system_id=system.id,
-                distance_ly=round(distance_ly, 2),
-                security=system.security,
-                category=system.category,
-                has_npc_station=False,  # TODO: Add station data
-                fuel_required=0,  # Calculated separately
-            ))
+            results.append(
+                SystemInRange(
+                    name=name,
+                    system_id=system.id,
+                    distance_ly=round(distance_ly, 2),
+                    security=system.security,
+                    category=system.category,
+                    has_npc_station=False,  # TODO: Add station data
+                    fuel_required=0,  # Calculated separately
+                )
+            )
 
     # Sort by distance
     results.sort(key=lambda x: x.distance_ly)
@@ -288,9 +295,7 @@ def plan_jump_route(
         waypoints = [from_system] + midpoints + [to_system]
     else:
         # Auto-plan route using greedy approach
-        waypoints = _auto_plan_waypoints(
-            from_system, to_system, jump_range.max_range_ly
-        )
+        waypoints = _auto_plan_waypoints(from_system, to_system, jump_range.max_range_ly)
 
     # Calculate each leg
     legs: list[JumpLeg] = []
@@ -315,15 +320,17 @@ def plan_jump_route(
             distance, current_fatigue
         )
 
-        legs.append(JumpLeg(
-            from_system=origin,
-            to_system=dest,
-            distance_ly=round(distance, 2),
-            fuel_required=fuel,
-            fatigue_added_minutes=fatigue_added,
-            total_fatigue_minutes=current_fatigue,
-            wait_time_minutes=wait_time,
-        ))
+        legs.append(
+            JumpLeg(
+                from_system=origin,
+                to_system=dest,
+                distance_ly=round(distance, 2),
+                fuel_required=fuel,
+                fatigue_added_minutes=fatigue_added,
+                total_fatigue_minutes=current_fatigue,
+                wait_time_minutes=wait_time,
+            )
+        )
 
         total_fuel += fuel
         total_distance += distance
@@ -388,7 +395,7 @@ def _auto_plan_waypoints(
 
         # Find the system that gets us closest to destination
         best_system = None
-        best_remaining_distance = float('inf')
+        best_remaining_distance = float("inf")
 
         for candidate in in_range:
             try:

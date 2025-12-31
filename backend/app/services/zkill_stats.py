@@ -67,8 +67,7 @@ async def fetch_system_kills(system_id: int, hours: int = 24) -> ZKillStats:
 
     try:
         async with httpx.AsyncClient(
-            timeout=httpx.Timeout(10.0),
-            headers={"User-Agent": settings.ZKILL_USER_AGENT}
+            timeout=httpx.Timeout(10.0), headers={"User-Agent": settings.ZKILL_USER_AGENT}
         ) as client:
             response = await client.get(url)
             response.raise_for_status()
@@ -96,7 +95,9 @@ async def fetch_system_kills(system_id: int, hours: int = 24) -> ZKillStats:
             # Cache the result
             await cache.set_json(cache_key, stats.model_dump(), ZKILL_STATS_TTL)
 
-            logger.debug(f"Fetched zkill stats for system {system_id}: {recent_kills} kills, {recent_pods} pods")
+            logger.debug(
+                f"Fetched zkill stats for system {system_id}: {recent_kills} kills, {recent_pods} pods"
+            )
             return stats
 
     except httpx.TimeoutException:
@@ -106,7 +107,9 @@ async def fetch_system_kills(system_id: int, hours: int = 24) -> ZKillStats:
         if e.response.status_code == 429:
             logger.warning("zKillboard rate limit hit, backing off")
         else:
-            logger.warning(f"HTTP error fetching zKill stats for {system_id}: {e.response.status_code}")
+            logger.warning(
+                f"HTTP error fetching zKill stats for {system_id}: {e.response.status_code}"
+            )
         return ZKillStats()
     except Exception as e:
         logger.exception(f"Error fetching zKill stats for system {system_id}: {e}")
@@ -157,10 +160,11 @@ def get_cached_stats_sync(system_id: int) -> ZKillStats | None:
     cache_key = build_zkill_stats_key(system_id)
 
     # Synchronous cache access - only works with memory cache
-    if hasattr(cache, '_caches'):
+    if hasattr(cache, "_caches"):
         for ttl_cache in cache._caches.values():
             if cache_key in ttl_cache:
                 import json
+
                 try:
                     data = json.loads(ttl_cache[cache_key])
                     return ZKillStats(**data)

@@ -12,10 +12,7 @@ def load_universe() -> Universe:
         raw = json.load(f)
 
     metadata = UniverseMetadata(**raw["metadata"])
-    systems = {
-        name: System(name=name, **data)
-        for name, data in raw["systems"].items()
-    }
+    systems = {name: System(name=name, **data) for name, data in raw["systems"].items()}
     gates = [
         Gate(from_system=item["from"], to_system=item["to"], distance=item.get("distance", 1))
         for item in raw["gates"]

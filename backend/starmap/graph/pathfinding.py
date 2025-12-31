@@ -196,9 +196,7 @@ def a_star(
         return math.sqrt((x - end_x) ** 2 + (y - end_y) ** 2) / 50
 
     # Priority queue: (f_score, system_id, path, g_score)
-    heap: list[tuple[float, int, list[int], float]] = [
-        (heuristic(start), start, [start], 0)
-    ]
+    heap: list[tuple[float, int, list[int], float]] = [(heuristic(start), start, [start], 0)]
     visited: set[int] = set()
     g_scores: dict[int, float] = {start: 0}
 
@@ -249,6 +247,7 @@ def get_weight_fn(
         return lambda src, dst, w: 1.0  # All edges weight 1
 
     if route_type == RouteType.SECURE:
+
         def secure_weight(src: int, dst: int, base: float) -> float:
             _, _, sec_class = system_info.get(dst, (0, 0, "nullsec"))
             if sec_class == "highsec":
@@ -256,14 +255,17 @@ def get_weight_fn(
             if sec_class == "lowsec":
                 return 5.0  # Avoid lowsec
             return 10.0  # Strongly avoid nullsec
+
         return secure_weight
 
     if route_type == RouteType.INSECURE:
+
         def insecure_weight(src: int, dst: int, base: float) -> float:
             _, _, sec_class = system_info.get(dst, (0, 0, "nullsec"))
             if sec_class == "highsec":
                 return 5.0  # Avoid highsec (gate camps less likely in lowsec)
             return 1.0
+
         return insecure_weight
 
     return lambda src, dst, w: w
@@ -376,10 +378,7 @@ async def find_route_avoid(
 
     weight_fn = get_weight_fn(route_type, system_info)
 
-    path = a_star(
-        adjacency, system_info, origin, destination,
-        avoid=avoid, weight_fn=weight_fn
-    )
+    path = a_star(adjacency, system_info, origin, destination, avoid=avoid, weight_fn=weight_fn)
 
     if not path:
         return RouteResult.not_found()

@@ -159,9 +159,7 @@ class TestConnectionManager:
         assert sent_count == 0
 
     @pytest.mark.asyncio
-    async def test_broadcast_kill_pod_filter(
-        self, manager, mock_websocket, sample_pod_kill_data
-    ):
+    async def test_broadcast_kill_pod_filter(self, manager, mock_websocket, sample_pod_kill_data):
         """Test pod filter excludes pod kills when disabled."""
         await manager.connect("client1", mock_websocket)
         await manager.update_subscription("client1", include_pods=False)
@@ -170,9 +168,7 @@ class TestConnectionManager:
         assert sent_count == 0
 
     @pytest.mark.asyncio
-    async def test_broadcast_kill_value_filter(
-        self, manager, mock_websocket, sample_kill_data
-    ):
+    async def test_broadcast_kill_value_filter(self, manager, mock_websocket, sample_kill_data):
         """Test minimum value filter."""
         await manager.connect("client1", mock_websocket)
         await manager.update_subscription("client1", min_value=1000000000)  # 1B ISK

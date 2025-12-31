@@ -131,6 +131,7 @@ def record_http_request(method: str, path: str, status: int, duration: float) ->
 def normalize_path(path: str) -> str:
     """Normalize path to reduce cardinality (replace IDs with placeholders)."""
     import re
+
     # Replace numeric IDs
     path = re.sub(r"/\d+", "/{id}", path)
     # Replace UUIDs

@@ -1,6 +1,5 @@
 """Jump bridge API v1 endpoints."""
 
-
 from fastapi import APIRouter, HTTPException, Query
 
 from ...models.jumpbridge import (

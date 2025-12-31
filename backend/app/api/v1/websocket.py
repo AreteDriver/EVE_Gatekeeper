@@ -55,12 +55,14 @@ async def killfeed_websocket(websocket: WebSocket):
         await connection_manager.connect(client_id, websocket)
 
         # Send welcome message
-        await websocket.send_json({
-            "type": "connected",
-            "client_id": client_id,
-            "message": "Connected to EVE Gatekeeper kill feed",
-            "active_connections": connection_manager.connection_count,
-        })
+        await websocket.send_json(
+            {
+                "type": "connected",
+                "client_id": client_id,
+                "message": "Connected to EVE Gatekeeper kill feed",
+                "active_connections": connection_manager.connection_count,
+            }
+        )
 
         # Listen for messages
         while True:
@@ -69,10 +71,12 @@ async def killfeed_websocket(websocket: WebSocket):
                 await handle_client_message(client_id, data, websocket)
             except ValueError:
                 # Invalid JSON
-                await websocket.send_json({
-                    "type": "error",
-                    "message": "Invalid JSON message",
-                })
+                await websocket.send_json(
+                    {
+                        "type": "error",
+                        "message": "Invalid JSON message",
+                    }
+                )
 
     except WebSocketDisconnect:
         logger.info(f"Client {client_id} disconnected normally")
@@ -106,34 +110,42 @@ async def handle_client_message(
         )
 
         if success:
-            await websocket.send_json({
-                "type": "subscribed",
-                "filters": {
-                    "systems": systems,
-                    "regions": regions,
-                    "min_value": min_value,
-                    "include_pods": include_pods,
-                },
-            })
+            await websocket.send_json(
+                {
+                    "type": "subscribed",
+                    "filters": {
+                        "systems": systems,
+                        "regions": regions,
+                        "min_value": min_value,
+                        "include_pods": include_pods,
+                    },
+                }
+            )
         else:
-            await websocket.send_json({
-                "type": "error",
-                "message": "Failed to update subscription",
-            })
+            await websocket.send_json(
+                {
+                    "type": "error",
+                    "message": "Failed to update subscription",
+                }
+            )
 
     elif message_type == "ping":
         await websocket.send_json({"type": "pong"})
 
     elif message_type == "status":
         stats = connection_manager.get_stats()
-        await websocket.send_json({
-            "type": "status",
-            "data": stats,
-        })
+        await websocket.send_json(
+            {
+                "type": "status",
+                "data": stats,
+            }
+        )
 
     else:
-        await websocket.send_json({
-            "type": "error",
-            "message": f"Unknown message type: {message_type}",
-            "valid_types": ["subscribe", "ping", "status"],
-        })
+        await websocket.send_json(
+            {
+                "type": "error",
+                "message": f"Unknown message type: {message_type}",
+                "valid_types": ["subscribe", "ping", "status"],
+            }
+        )

@@ -204,7 +204,9 @@ class TestSystemsInRangeEndpoint:
 
     def test_different_ship_types_different_ranges(self, test_client: TestClient):
         """Different ship types should have different max ranges."""
-        response_jf = test_client.get("/api/v1/jump/systems-in-range?origin=Jita&ship=jump_freighter")
+        response_jf = test_client.get(
+            "/api/v1/jump/systems-in-range?origin=Jita&ship=jump_freighter"
+        )
         response_blops = test_client.get("/api/v1/jump/systems-in-range?origin=Jita&ship=black_ops")
 
         data_jf = response_jf.json()

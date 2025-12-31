@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 def clear_bridge_config():
     """Clear bridge config before each test."""
     from backend.app.services.jumpbridge import clear_bridge_cache
+
     clear_bridge_cache()
     yield
     clear_bridge_cache()
@@ -40,10 +41,7 @@ class TestImportBridgesEndpoint:
         """Should import valid bridge text."""
         response = test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "Jita <-> Perimeter"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "Jita <-> Perimeter"},
         )
 
         assert response.status_code == 200
@@ -60,10 +58,7 @@ class TestImportBridgesEndpoint:
         """
         response = test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": bridge_text
-            }
+            json={"network_name": "TestNetwork", "bridge_text": bridge_text},
         )
 
         assert response.status_code == 200
@@ -79,10 +74,7 @@ class TestImportBridgesEndpoint:
         """
         response = test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": bridge_text
-            }
+            json={"network_name": "TestNetwork", "bridge_text": bridge_text},
         )
 
         assert response.status_code == 200
@@ -93,10 +85,7 @@ class TestImportBridgesEndpoint:
         """Should report errors for invalid systems."""
         response = test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "FakeSystem <-> AnotherFake"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "FakeSystem <-> AnotherFake"},
         )
 
         assert response.status_code == 200
@@ -113,10 +102,7 @@ class TestImportBridgesEndpoint:
         """
         response = test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": bridge_text
-            }
+            json={"network_name": "TestNetwork", "bridge_text": bridge_text},
         )
 
         assert response.status_code == 200
@@ -129,19 +115,13 @@ class TestImportBridgesEndpoint:
         # First import
         test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "Jita <-> Perimeter"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "Jita <-> Perimeter"},
         )
 
         # Second import with replace
         response = test_client.post(
             "/api/v1/bridges/import?replace=true",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "Amarr <-> Niarja"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "Amarr <-> Niarja"},
         )
 
         assert response.status_code == 200
@@ -157,10 +137,7 @@ class TestImportBridgesEndpoint:
         """Should create network on import."""
         response = test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "NewNetwork",
-                "bridge_text": "Jita <-> Perimeter"
-            }
+            json={"network_name": "NewNetwork", "bridge_text": "Jita <-> Perimeter"},
         )
 
         assert response.status_code == 200
@@ -180,10 +157,7 @@ class TestToggleNetworkEndpoint:
         # First create network
         test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "Jita <-> Perimeter"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "Jita <-> Perimeter"},
         )
 
         # Toggle disable
@@ -199,10 +173,7 @@ class TestToggleNetworkEndpoint:
         # First create and disable network
         test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "Jita <-> Perimeter"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "Jita <-> Perimeter"},
         )
         test_client.patch("/api/v1/bridges/TestNetwork?enabled=false")
 
@@ -228,10 +199,7 @@ class TestDeleteNetworkEndpoint:
         # First create network
         test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "Jita <-> Perimeter"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "Jita <-> Perimeter"},
         )
 
         # Delete
@@ -263,10 +231,7 @@ class TestGetNetworkEndpoint:
         # First create network
         test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "Jita <-> Perimeter"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "Jita <-> Perimeter"},
         )
 
         response = test_client.get("/api/v1/bridges/TestNetwork")
@@ -288,10 +253,7 @@ class TestGetNetworkEndpoint:
         # First create network
         test_client.post(
             "/api/v1/bridges/import",
-            json={
-                "network_name": "TestNetwork",
-                "bridge_text": "Jita <-> Perimeter"
-            }
+            json={"network_name": "TestNetwork", "bridge_text": "Jita <-> Perimeter"},
         )
 
         response = test_client.get("/api/v1/bridges/TestNetwork")

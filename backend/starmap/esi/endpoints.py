@@ -135,9 +135,7 @@ async def get_sovereignty_map(
     }
 
     if cache:
-        await cache.set(
-            cache_key, "sovereignty_map", result, etag=headers.get("etag")
-        )
+        await cache.set(cache_key, "sovereignty_map", result, etag=headers.get("etag"))
 
     return result
 
@@ -164,9 +162,7 @@ async def get_sovereignty_campaigns(
     data, headers = await client.get("/sovereignty/campaigns/")
 
     if cache:
-        await cache.set(
-            cache_key, "sovereignty_campaigns", data, etag=headers.get("etag")
-        )
+        await cache.set(cache_key, "sovereignty_campaigns", data, etag=headers.get("etag"))
 
     return cast(list[dict[str, Any]], data)
 

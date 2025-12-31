@@ -161,18 +161,20 @@ def compare_routes(request: RouteCompareRequest) -> RouteCompareResponse:
                 elif sys.category == "nullsec":
                     nullsec += 1
 
-            routes.append(RouteSummary(
-                profile=profile,
-                total_jumps=route.total_jumps,
-                total_cost=round(route.total_cost, 2),
-                max_risk=round(route.max_risk, 1),
-                avg_risk=round(route.avg_risk, 1),
-                bridges_used=route.bridges_used,
-                highsec_jumps=highsec,
-                lowsec_jumps=lowsec,
-                nullsec_jumps=nullsec,
-                path_systems=[hop.system_name for hop in route.path],
-            ))
+            routes.append(
+                RouteSummary(
+                    profile=profile,
+                    total_jumps=route.total_jumps,
+                    total_cost=round(route.total_cost, 2),
+                    max_risk=round(route.max_risk, 1),
+                    avg_risk=round(route.avg_risk, 1),
+                    bridges_used=route.bridges_used,
+                    highsec_jumps=highsec,
+                    lowsec_jumps=lowsec,
+                    nullsec_jumps=nullsec,
+                    path_systems=[hop.system_name for hop in route.path],
+                )
+            )
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from None
 
@@ -201,7 +203,9 @@ def _generate_recommendation(routes: list[RouteSummary]) -> str:
     min(routes, key=lambda r: r.avg_risk)
 
     # Check if all routes are the same
-    if all(r.total_jumps == routes[0].total_jumps and r.max_risk == routes[0].max_risk for r in routes):
+    if all(
+        r.total_jumps == routes[0].total_jumps and r.max_risk == routes[0].max_risk for r in routes
+    ):
         return f"All profiles produce the same {routes[0].total_jumps}-jump route"
 
     # Build recommendation
@@ -215,7 +219,9 @@ def _generate_recommendation(routes: list[RouteSummary]) -> str:
             f"'{safest.profile}' adds {jump_diff} jumps but reduces max risk by {risk_diff:.0f} points."
         )
     else:
-        parts.append(f"'{shortest.profile}' is both fastest and safest ({shortest.total_jumps} jumps, max risk {shortest.max_risk:.0f})")
+        parts.append(
+            f"'{shortest.profile}' is both fastest and safest ({shortest.total_jumps} jumps, max risk {shortest.max_risk:.0f})"
+        )
 
     # Note if any route avoids lowsec/nullsec entirely
     for route in routes:
@@ -262,25 +268,29 @@ def bulk_routes(request: BulkRouteRequest) -> BulkRouteResponse:
     for dest in request.to_systems:
         # Skip if destination equals origin
         if dest == request.from_system:
-            results.append(BulkRouteResult(
-                to_system=dest,
-                success=True,
-                total_jumps=0,
-                total_cost=0.0,
-                max_risk=0.0,
-                avg_risk=0.0,
-                path_systems=[dest],
-            ))
+            results.append(
+                BulkRouteResult(
+                    to_system=dest,
+                    success=True,
+                    total_jumps=0,
+                    total_cost=0.0,
+                    max_risk=0.0,
+                    avg_risk=0.0,
+                    path_systems=[dest],
+                )
+            )
             successful += 1
             continue
 
         # Check if destination exists
         if dest not in universe.systems:
-            results.append(BulkRouteResult(
-                to_system=dest,
-                success=False,
-                error=f"Unknown system: {dest}",
-            ))
+            results.append(
+                BulkRouteResult(
+                    to_system=dest,
+                    success=False,
+                    error=f"Unknown system: {dest}",
+                )
+            )
             failed += 1
             continue
 
@@ -292,23 +302,27 @@ def bulk_routes(request: BulkRouteRequest) -> BulkRouteResponse:
                 avoid=avoid_set,
                 use_bridges=request.use_bridges,
             )
-            results.append(BulkRouteResult(
-                to_system=dest,
-                success=True,
-                total_jumps=route.total_jumps,
-                total_cost=round(route.total_cost, 2),
-                max_risk=round(route.max_risk, 1),
-                avg_risk=round(route.avg_risk, 1),
-                bridges_used=route.bridges_used,
-                path_systems=[hop.system_name for hop in route.path],
-            ))
+            results.append(
+                BulkRouteResult(
+                    to_system=dest,
+                    success=True,
+                    total_jumps=route.total_jumps,
+                    total_cost=round(route.total_cost, 2),
+                    max_risk=round(route.max_risk, 1),
+                    avg_risk=round(route.avg_risk, 1),
+                    bridges_used=route.bridges_used,
+                    path_systems=[hop.system_name for hop in route.path],
+                )
+            )
             successful += 1
         except ValueError as e:
-            results.append(BulkRouteResult(
-                to_system=dest,
-                success=False,
-                error=str(e),
-            ))
+            results.append(
+                BulkRouteResult(
+                    to_system=dest,
+                    success=False,
+                    error=str(e),
+                )
+            )
             failed += 1
 
     # Sort by jump count (successful routes first, then by jumps)

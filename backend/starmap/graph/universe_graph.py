@@ -43,9 +43,7 @@ class UniverseGraph:
 
         self._adjacency = {}
         async with aiosqlite.connect(self.db_path) as db:
-            cursor = await db.execute(
-                "SELECT from_system_id, to_system_id FROM system_connections"
-            )
+            cursor = await db.execute("SELECT from_system_id, to_system_id FROM system_connections")
             async for row in cursor:
                 from_sys, to_sys = row
                 if from_sys not in self._adjacency:
@@ -420,9 +418,7 @@ class UniverseGraph:
                 return int(row[0]) if row else 0
 
             # System counts
-            stats["total_systems"] = await fetch_count(
-                "SELECT COUNT(*) FROM solar_systems"
-            )
+            stats["total_systems"] = await fetch_count("SELECT COUNT(*) FROM solar_systems")
             stats["highsec_systems"] = await fetch_count(
                 "SELECT COUNT(*) FROM solar_systems WHERE security_class = 'highsec'"
             )
@@ -440,8 +436,6 @@ class UniverseGraph:
             stats["total_connections"] = await fetch_count(
                 "SELECT COUNT(*) FROM system_connections"
             )
-            stats["total_regions"] = await fetch_count(
-                "SELECT COUNT(*) FROM regions"
-            )
+            stats["total_regions"] = await fetch_count("SELECT COUNT(*) FROM regions")
 
             return stats

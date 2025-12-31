@@ -1,6 +1,5 @@
 """Systems API v1 endpoints."""
 
-
 from fastapi import APIRouter, HTTPException
 
 from ...models.risk import RiskReport

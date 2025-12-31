@@ -33,6 +33,7 @@ def event_loop() -> Generator:
 def app():
     """Create the FastAPI application for testing."""
     from backend.app.main import app
+
     return app
 
 
@@ -189,6 +190,7 @@ def cleanup():
     yield
     # Cleanup code here if needed
     import os
+
     test_db = "./test_eve_gatekeeper.db"
     if os.path.exists(test_db):
         try:

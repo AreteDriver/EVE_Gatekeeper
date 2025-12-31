@@ -371,8 +371,7 @@ async def create_tables(db_path: Path | None = None) -> None:
 
         # Insert schema version if not exists
         await db.execute(
-            "INSERT OR IGNORE INTO schema_version (version) VALUES (?)",
-            (SCHEMA_VERSION,)
+            "INSERT OR IGNORE INTO schema_version (version) VALUES (?)", (SCHEMA_VERSION,)
         )
         await db.commit()
 
@@ -387,9 +386,7 @@ async def get_schema_version(db_path: Path | None = None) -> int:
 
     async with aiosqlite.connect(db_path) as db:
         try:
-            cursor = await db.execute(
-                "SELECT MAX(version) FROM schema_version"
-            )
+            cursor = await db.execute("SELECT MAX(version) FROM schema_version")
             row = await cursor.fetchone()
             return row[0] if row and row[0] else 0
         except aiosqlite.OperationalError:

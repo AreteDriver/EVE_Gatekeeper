@@ -96,7 +96,7 @@ class TestMemoryCacheService:
         assert stats["type"] == "memory"
         assert stats["hits"] == 2
         assert stats["misses"] == 1
-        assert stats["hit_ratio"] == pytest.approx(2/3)
+        assert stats["hit_ratio"] == pytest.approx(2 / 3)
 
 
 class TestCacheKeyBuilders:

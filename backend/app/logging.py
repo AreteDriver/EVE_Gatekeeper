@@ -10,9 +10,7 @@ from structlog.types import EventDict, Processor
 from .core.config import settings
 
 
-def add_log_level(
-    logger: logging.Logger, method_name: str, event_dict: EventDict
-) -> EventDict:
+def add_log_level(logger: logging.Logger, method_name: str, event_dict: EventDict) -> EventDict:
     """Add log level to event dict."""
     if method_name == "warn":
         method_name = "warning"
@@ -20,11 +18,10 @@ def add_log_level(
     return event_dict
 
 
-def add_timestamp(
-    logger: logging.Logger, method_name: str, event_dict: EventDict
-) -> EventDict:
+def add_timestamp(logger: logging.Logger, method_name: str, event_dict: EventDict) -> EventDict:
     """Add ISO timestamp to event dict."""
     from datetime import datetime
+
     event_dict["timestamp"] = datetime.now(UTC).isoformat()
     return event_dict
 

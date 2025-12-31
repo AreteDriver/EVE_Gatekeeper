@@ -63,7 +63,9 @@ def _build_graph(
     return graph, edge_types
 
 
-def _dijkstra(graph: dict[str, dict[str, float]], start: str, end: str, profile: str) -> tuple[list[str], float]:
+def _dijkstra(
+    graph: dict[str, dict[str, float]], start: str, end: str, profile: str
+) -> tuple[list[str], float]:
     cfg = load_risk_config()
     profile_cfg = cfg.routing_profiles.get(profile, cfg.routing_profiles["shortest"])
     risk_factor = profile_cfg.get("risk_factor", 0.0)

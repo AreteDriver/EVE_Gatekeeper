@@ -10,7 +10,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 # Import directly from the module file to avoid __init__ imports
 import importlib.util
-ship_data_path = Path(__file__).parent.parent.parent / "backend" / "starmap" / "jump_planner" / "ship_data.py"
+
+ship_data_path = (
+    Path(__file__).parent.parent.parent / "backend" / "starmap" / "jump_planner" / "ship_data.py"
+)
 spec = importlib.util.spec_from_file_location("ship_data", ship_data_path)
 ship_data = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ship_data)

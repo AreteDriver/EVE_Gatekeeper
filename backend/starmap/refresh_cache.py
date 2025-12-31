@@ -37,10 +37,10 @@ from backend.sde.schema import get_db_path
 
 # Refresh intervals (seconds)
 INTERVALS = {
-    "kills": 300,      # 5 minutes
-    "jumps": 300,      # 5 minutes
+    "kills": 300,  # 5 minutes
+    "jumps": 300,  # 5 minutes
     "incursions": 600,  # 10 minutes
-    "sov": 3600,       # 1 hour
+    "sov": 3600,  # 1 hour
 }
 
 
@@ -73,6 +73,7 @@ async def update_system_stats(db_path: str, kills: dict, jumps: dict) -> int:
             # Calculate activity index (normalized 0-1)
             # Simple formula: log scale of total activity
             import math
+
             total_activity = ship_kills + pod_kills + j
             activity_index = min(1.0, math.log10(total_activity + 1) / 4)
 
@@ -295,9 +296,7 @@ async def run_once(refresh_type: str | None = None) -> None:
 
 def main() -> None:
     """Entry point."""
-    parser = argparse.ArgumentParser(
-        description="Refresh EVE Starmap ESI data caches"
-    )
+    parser = argparse.ArgumentParser(description="Refresh EVE Starmap ESI data caches")
     parser.add_argument(
         "--once",
         action="store_true",

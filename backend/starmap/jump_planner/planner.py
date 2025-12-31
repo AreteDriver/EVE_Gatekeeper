@@ -93,9 +93,7 @@ class JumpPlanner:
             return
 
         async with aiosqlite.connect(self.db_path) as db:
-            cursor = await db.execute(
-                "SELECT system_id, x, y, z FROM solar_systems"
-            )
+            cursor = await db.execute("SELECT system_id, x, y, z FROM solar_systems")
             async for row in cursor:
                 self._system_positions[row[0]] = (row[1], row[2], row[3])
 
@@ -147,9 +145,7 @@ class JumpPlanner:
             async for row in cursor:
                 sys_id, x, y, z, _ = row
                 distance_m = math.sqrt(
-                    (x - origin_pos[0]) ** 2 +
-                    (y - origin_pos[1]) ** 2 +
-                    (z - origin_pos[2]) ** 2
+                    (x - origin_pos[0]) ** 2 + (y - origin_pos[1]) ** 2 + (z - origin_pos[2]) ** 2
                 )
                 distance_ly = distance_m / 9.461e15
 

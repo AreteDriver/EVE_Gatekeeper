@@ -45,6 +45,7 @@ class ConnectionManager:
         """Accept a new WebSocket connection."""
         await websocket.accept()
         import time
+
         async with self._lock:
             self._clients[client_id] = ConnectedClient(
                 websocket=websocket,
@@ -169,10 +170,12 @@ class ConnectionManager:
                 continue
 
             try:
-                await client.websocket.send_json({
-                    "type": "kill",
-                    "data": kill_data,
-                })
+                await client.websocket.send_json(
+                    {
+                        "type": "kill",
+                        "data": kill_data,
+                    }
+                )
                 sent_count += 1
             except Exception as e:
                 logger.warning(f"Failed to send kill to client {client_id}: {e}")

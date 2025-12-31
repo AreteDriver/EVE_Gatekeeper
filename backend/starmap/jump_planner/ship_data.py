@@ -38,40 +38,33 @@ CAPITAL_SHIPS: dict[int, CapitalShipData] = {
     19722: CapitalShipData(19722, "Moros", 5.0, 1000, FuelType.OXYGEN),
     19724: CapitalShipData(19724, "Naglfar", 5.0, 1000, FuelType.HYDROGEN),
     19726: CapitalShipData(19726, "Phoenix", 5.0, 1000, FuelType.NITROGEN),
-
     # Carriers
     23757: CapitalShipData(23757, "Archon", 5.0, 1000, FuelType.HELIUM),
     23911: CapitalShipData(23911, "Thanatos", 5.0, 1000, FuelType.OXYGEN),
     23915: CapitalShipData(23915, "Nidhoggur", 5.0, 1000, FuelType.HYDROGEN),
     23913: CapitalShipData(23913, "Chimera", 5.0, 1000, FuelType.NITROGEN),
-
     # Force Auxiliaries
     37604: CapitalShipData(37604, "Apostle", 5.0, 1000, FuelType.HELIUM),
     37606: CapitalShipData(37606, "Ninazu", 5.0, 1000, FuelType.OXYGEN),
     37608: CapitalShipData(37608, "Lif", 5.0, 1000, FuelType.HYDROGEN),
     37605: CapitalShipData(37605, "Minokawa", 5.0, 1000, FuelType.NITROGEN),
-
     # Supercarriers
     23917: CapitalShipData(23917, "Aeon", 5.0, 5000, FuelType.HELIUM),
     23919: CapitalShipData(23919, "Nyx", 5.0, 5000, FuelType.OXYGEN),
     22852: CapitalShipData(22852, "Hel", 5.0, 5000, FuelType.HYDROGEN),
     23918: CapitalShipData(23918, "Wyvern", 5.0, 5000, FuelType.NITROGEN),
-
     # Titans
     671: CapitalShipData(671, "Avatar", 5.0, 10000, FuelType.HELIUM),
     3764: CapitalShipData(3764, "Erebus", 5.0, 10000, FuelType.OXYGEN),
     11567: CapitalShipData(11567, "Ragnarok", 5.0, 10000, FuelType.HYDROGEN),
     23773: CapitalShipData(23773, "Leviathan", 5.0, 10000, FuelType.NITROGEN),
-
     # Jump Freighters
     28844: CapitalShipData(28844, "Ark", 5.0, 3000, FuelType.HELIUM, is_jump_freighter=True),
     28846: CapitalShipData(28846, "Anshar", 5.0, 3000, FuelType.OXYGEN, is_jump_freighter=True),
     28848: CapitalShipData(28848, "Nomad", 5.0, 3000, FuelType.HYDROGEN, is_jump_freighter=True),
     28850: CapitalShipData(28850, "Rhea", 5.0, 3000, FuelType.NITROGEN, is_jump_freighter=True),
-
     # Rorqual (Industrial Capital)
     28352: CapitalShipData(28352, "Rorqual", 5.0, 3000, FuelType.OXYGEN),
-
     # Black Ops Battleships
     22428: CapitalShipData(22428, "Sin", 3.5, 400, FuelType.OXYGEN, is_black_ops=True),
     22430: CapitalShipData(22430, "Widow", 3.5, 400, FuelType.NITROGEN, is_black_ops=True),

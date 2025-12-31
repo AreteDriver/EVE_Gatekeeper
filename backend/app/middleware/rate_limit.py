@@ -35,7 +35,7 @@ limiter = Limiter(
 
 def rate_limit_exceeded_handler(request: Request, exc: Exception) -> Response:
     """Handle rate limit exceeded errors."""
-    detail = getattr(exc, 'detail', None)
+    detail = getattr(exc, "detail", None)
     retry_after = detail.split("per")[0].strip() if detail else "60"
 
     return Response(

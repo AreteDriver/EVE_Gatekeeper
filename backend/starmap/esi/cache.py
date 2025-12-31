@@ -16,12 +16,10 @@ TTL_CONFIG = {
     "incursions": 600,  # 10 minutes
     "sovereignty_map": 3600,  # 1 hour
     "sovereignty_campaigns": 300,  # 5 minutes
-
     # Static data - long TTL
     "universe_types": 86400 * 7,  # 1 week
     "universe_categories": 86400 * 7,
     "universe_groups": 86400 * 7,
-
     # Default
     "default": 300,  # 5 minutes
 }

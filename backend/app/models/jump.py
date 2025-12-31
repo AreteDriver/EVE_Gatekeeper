@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 class ShipType(str, Enum):
     """Capital ship types with jump drives."""
+
     JUMP_FREIGHTER = "jump_freighter"
     CARRIER = "carrier"
     DREADNOUGHT = "dreadnought"
@@ -19,6 +20,7 @@ class ShipType(str, Enum):
 
 class JumpRangeResponse(BaseModel):
     """Jump range calculation response."""
+
     ship_type: str
     base_range_ly: float = Field(..., description="Base jump range before skills")
     max_range_ly: float = Field(..., description="Max range with current skills")
@@ -29,6 +31,7 @@ class JumpRangeResponse(BaseModel):
 
 class SystemInRangeResponse(BaseModel):
     """A system within jump range."""
+
     name: str
     system_id: int
     distance_ly: float
@@ -39,6 +42,7 @@ class SystemInRangeResponse(BaseModel):
 
 class JumpLegResponse(BaseModel):
     """A single jump leg in a route."""
+
     from_system: str
     to_system: str
     distance_ly: float
@@ -50,6 +54,7 @@ class JumpLegResponse(BaseModel):
 
 class JumpRouteResponse(BaseModel):
     """Complete jump route response."""
+
     from_system: str
     to_system: str
     ship_type: str
@@ -63,6 +68,7 @@ class JumpRouteResponse(BaseModel):
 
 class SystemsInRangeResponse(BaseModel):
     """Response for systems in range query."""
+
     origin: str
     max_range_ly: float
     count: int

@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, Field
 
 
@@ -9,8 +8,7 @@ class RouteHop(BaseModel):
     cumulative_cost: float
     risk_score: float
     connection_type: str = Field(
-        "gate",
-        description="How we reached this system: 'gate' or 'bridge'"
+        "gate", description="How we reached this system: 'gate' or 'bridge'"
     )
 
 
@@ -28,11 +26,11 @@ class RouteResponse(BaseModel):
 
 class RouteCompareRequest(BaseModel):
     """Request for comparing multiple routes."""
+
     from_system: str = Field(..., description="Origin system name")
     to_system: str = Field(..., description="Destination system name")
     profiles: list[str] = Field(
-        default=["shortest", "safer", "paranoid"],
-        description="Profiles to compare"
+        default=["shortest", "safer", "paranoid"], description="Profiles to compare"
     )
     use_bridges: bool = Field(False, description="Include bridges in routing")
     avoid: list[str] = Field(default_factory=list, description="Systems to avoid")
@@ -40,6 +38,7 @@ class RouteCompareRequest(BaseModel):
 
 class RouteSummary(BaseModel):
     """Summary of a single route for comparison."""
+
     profile: str
     total_jumps: int
     total_cost: float
@@ -54,6 +53,7 @@ class RouteSummary(BaseModel):
 
 class RouteCompareResponse(BaseModel):
     """Response comparing multiple routes."""
+
     from_system: str
     to_system: str
     routes: list[RouteSummary]
@@ -62,6 +62,7 @@ class RouteCompareResponse(BaseModel):
 
 class BulkRouteRequest(BaseModel):
     """Request for calculating multiple routes."""
+
     from_system: str = Field(..., description="Origin system name")
     to_systems: list[str] = Field(..., description="List of destination systems")
     profile: str = Field("shortest", description="Routing profile to use")
@@ -71,6 +72,7 @@ class BulkRouteRequest(BaseModel):
 
 class BulkRouteResult(BaseModel):
     """Result for a single route in bulk calculation."""
+
     to_system: str
     success: bool
     total_jumps: int | None = None
@@ -84,6 +86,7 @@ class BulkRouteResult(BaseModel):
 
 class BulkRouteResponse(BaseModel):
     """Response for bulk route calculation."""
+
     from_system: str
     profile: str
     total_destinations: int

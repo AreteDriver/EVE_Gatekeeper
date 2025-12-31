@@ -11,11 +11,7 @@ class TestRouteCompareEndpoint:
         """Should compare routes between two systems."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest", "safer"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest", "safer"]},
         )
 
         assert response.status_code == 200
@@ -29,11 +25,7 @@ class TestRouteCompareEndpoint:
         """Should return route summaries for each profile."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest", "safer"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest", "safer"]},
         )
 
         data = response.json()
@@ -43,11 +35,7 @@ class TestRouteCompareEndpoint:
         """Each route summary should have required fields."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest"]},
         )
 
         data = response.json()
@@ -67,11 +55,7 @@ class TestRouteCompareEndpoint:
         """Should return error for unknown from system."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "FakeSystem",
-                "to_system": "Amarr",
-                "profiles": ["shortest"]
-            }
+            json={"from_system": "FakeSystem", "to_system": "Amarr", "profiles": ["shortest"]},
         )
 
         assert response.status_code == 400
@@ -81,11 +65,7 @@ class TestRouteCompareEndpoint:
         """Should return error for unknown to system."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "FakeSystem",
-                "profiles": ["shortest"]
-            }
+            json={"from_system": "Jita", "to_system": "FakeSystem", "profiles": ["shortest"]},
         )
 
         assert response.status_code == 400
@@ -95,11 +75,7 @@ class TestRouteCompareEndpoint:
         """Should return error for unknown profile."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["invalid_profile"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["invalid_profile"]},
         )
 
         assert response.status_code == 400
@@ -109,11 +85,7 @@ class TestRouteCompareEndpoint:
         """Should compare all standard profiles."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest", "safer"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest", "safer"]},
         )
 
         assert response.status_code == 200
@@ -124,11 +96,7 @@ class TestRouteCompareEndpoint:
         """Should generate a recommendation."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest", "safer"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest", "safer"]},
         )
 
         data = response.json()
@@ -142,8 +110,8 @@ class TestRouteCompareEndpoint:
                 "from_system": "Jita",
                 "to_system": "Amarr",
                 "profiles": ["shortest"],
-                "avoid": ["Niarja"]
-            }
+                "avoid": ["Niarja"],
+            },
         )
 
         assert response.status_code == 200
@@ -157,11 +125,7 @@ class TestRouteCompareEndpoint:
         """Should handle same origin and destination."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Jita",
-                "profiles": ["shortest"]
-            }
+            json={"from_system": "Jita", "to_system": "Jita", "profiles": ["shortest"]},
         )
 
         # Either 200 with 0 jumps or error - both valid
@@ -173,11 +137,7 @@ class TestRouteCompareEndpoint:
         """Path should start at origin system."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest"]},
         )
 
         data = response.json()
@@ -187,11 +147,7 @@ class TestRouteCompareEndpoint:
         """Path should end at destination system."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest"]},
         )
 
         data = response.json()
@@ -201,11 +157,7 @@ class TestRouteCompareEndpoint:
         """Security category counts should add up to total jumps + 1."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest"]},
         )
 
         data = response.json()
@@ -219,15 +171,13 @@ class TestRouteCompareEndpoint:
         """Single profile should get appropriate recommendation."""
         response = test_client.post(
             "/api/v1/route/compare",
-            json={
-                "from_system": "Jita",
-                "to_system": "Amarr",
-                "profiles": ["shortest"]
-            }
+            json={"from_system": "Jita", "to_system": "Amarr", "profiles": ["shortest"]},
         )
 
         data = response.json()
-        assert "shortest" in data["recommendation"].lower() or "only" in data["recommendation"].lower()
+        assert (
+            "shortest" in data["recommendation"].lower() or "only" in data["recommendation"].lower()
+        )
 
 
 class TestRouteAvoidEndpoint:

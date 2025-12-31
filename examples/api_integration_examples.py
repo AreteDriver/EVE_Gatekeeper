@@ -5,7 +5,6 @@ This file demonstrates various ways to integrate with the EVE Map API.
 All examples assume the backend server is running on http://localhost:8000
 """
 
-
 import requests
 
 
@@ -15,7 +14,7 @@ def example_1_list_systems():
     print("Example 1: List All Systems")
     print("=" * 70)
 
-    response = requests.get('http://localhost:8000/systems/')
+    response = requests.get("http://localhost:8000/systems/")
     systems = response.json()
 
     print(f"\nTotal systems: {len(systems)}")
@@ -31,14 +30,14 @@ def example_2_get_risk_report():
     print("Example 2: Get Risk Report for Jita")
     print("=" * 70)
 
-    response = requests.get('http://localhost:8000/systems/Jita/risk')
+    response = requests.get("http://localhost:8000/systems/Jita/risk")
     risk_data = response.json()
 
     print(f"\nSystem: {risk_data['system']}")
     print(f"Risk Score: {risk_data['risk_score']:.2f}")
     print(f"Classification: {risk_data['classification']}")
     print("\nRisk Factors:")
-    for factor, value in risk_data['factors'].items():
+    for factor, value in risk_data["factors"].items():
         print(f"  - {factor}: {value:.2f}")
     print()
 
@@ -49,17 +48,13 @@ def example_3_calculate_route():
     print("Example 3: Calculate Route from Jita to Niarja")
     print("=" * 70)
 
-    params = {
-        'from': 'Jita',
-        'to': 'Niarja',
-        'profile': 'safer'
-    }
+    params = {"from": "Jita", "to": "Niarja", "profile": "safer"}
 
-    response = requests.get('http://localhost:8000/map/route', params=params)
+    response = requests.get("http://localhost:8000/map/route", params=params)
     route = response.json()
 
     # Extract system names from route
-    system_names = [hop['system'] for hop in route['path']]
+    system_names = [hop["system"] for hop in route["path"]]
 
     print(f"\nRoute Profile: {params['profile']}")
     print(f"Route: {' -> '.join(system_names)}")
@@ -67,8 +62,8 @@ def example_3_calculate_route():
     print(f"Total Risk: {route['total_risk']:.2f}")
 
     print("\nDetailed Hops:")
-    for i, hop in enumerate(route['path']):
-        print(f"  {i+1}. {hop['system']} (risk: {hop['risk']:.2f})")
+    for i, hop in enumerate(route["path"]):
+        print(f"  {i + 1}. {hop['system']} (risk: {hop['risk']:.2f})")
     print()
 
 
@@ -78,7 +73,7 @@ def example_4_get_neighbors():
     print("Example 4: Get Neighbors of Jita")
     print("=" * 70)
 
-    response = requests.get('http://localhost:8000/systems/Jita/neighbors')
+    response = requests.get("http://localhost:8000/systems/Jita/neighbors")
     neighbors = response.json()
 
     print(f"\nJita has {len(neighbors)} neighboring systems:")
@@ -93,16 +88,16 @@ def example_5_get_map_config():
     print("Example 5: Get Map Configuration")
     print("=" * 70)
 
-    response = requests.get('http://localhost:8000/map/config')
+    response = requests.get("http://localhost:8000/map/config")
     config = response.json()
 
     print(f"\nTotal Systems: {len(config['systems'])}")
     print(f"Total Gates: {len(config['gates'])}")
 
     # Count systems by security
-    high_sec = sum(1 for s in config['systems'].values() if s['security_status'] >= 0.5)
-    low_sec = sum(1 for s in config['systems'].values() if 0.0 < s['security_status'] < 0.5)
-    null_sec = sum(1 for s in config['systems'].values() if s['security_status'] <= 0.0)
+    high_sec = sum(1 for s in config["systems"].values() if s["security_status"] >= 0.5)
+    low_sec = sum(1 for s in config["systems"].values() if 0.0 < s["security_status"] < 0.5)
+    null_sec = sum(1 for s in config["systems"].values() if s["security_status"] <= 0.0)
 
     print("\nSecurity Breakdown:")
     print(f"  - High Sec: {high_sec} systems")
@@ -110,7 +105,7 @@ def example_5_get_map_config():
     print(f"  - Null Sec: {null_sec} systems")
 
     print("\nRisk Profiles Available:")
-    for profile_name in config['risk_config']['profiles'].keys():
+    for profile_name in config["risk_config"]["profiles"].keys():
         print(f"  - {profile_name}")
     print()
 
@@ -121,21 +116,17 @@ def example_6_compare_routes():
     print("Example 6: Compare Routing Profiles (Jita to Niarja)")
     print("=" * 70)
 
-    profiles = ['shortest', 'safer', 'paranoid']
+    profiles = ["shortest", "safer", "paranoid"]
 
     print()
     for profile in profiles:
-        params = {
-            'from': 'Jita',
-            'to': 'Niarja',
-            'profile': profile
-        }
+        params = {"from": "Jita", "to": "Niarja", "profile": profile}
 
         try:
-            response = requests.get('http://localhost:8000/map/route', params=params)
+            response = requests.get("http://localhost:8000/map/route", params=params)
             route = response.json()
 
-            system_names = [hop['system'] for hop in route['path']]
+            system_names = [hop["system"] for hop in route["path"]]
 
             print(f"{profile.upper()} Profile:")
             print(f"  Route: {' -> '.join(system_names)}")
@@ -191,7 +182,7 @@ def example_8_error_handling():
     print("\nTrying to get info for non-existent system...")
 
     try:
-        response = requests.get('http://localhost:8000/systems/NonExistentSystem/risk')
+        response = requests.get("http://localhost:8000/systems/NonExistentSystem/risk")
         response.raise_for_status()  # Raise exception for 4xx/5xx status codes
         data = response.json()
         print(f"Risk data: {data}")
@@ -220,7 +211,7 @@ def main():
 
     # Check if server is running
     try:
-        response = requests.get('http://localhost:8000/health', timeout=2)
+        response = requests.get("http://localhost:8000/health", timeout=2)
         if response.status_code == 200:
             print("✓ Server is running!\n")
         else:
@@ -244,6 +235,7 @@ def main():
     except Exception as e:
         print(f"\nError running examples: {e}")
         import traceback
+
         traceback.print_exc()
 
     print("\n" + "*" * 70)
