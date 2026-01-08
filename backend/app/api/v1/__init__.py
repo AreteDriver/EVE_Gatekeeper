@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter
 
+from .auth import router as auth_router
 from .bridges import router as bridges_router
 from .jump import router as jump_router
 from .routing import router as routing_router
@@ -11,6 +12,7 @@ from .websocket import router as websocket_router
 
 router = APIRouter(prefix="/api/v1")
 
+router.include_router(auth_router, tags=["auth"])
 router.include_router(systems_router, prefix="/systems", tags=["systems"])
 router.include_router(routing_router, prefix="/route", tags=["routing"])
 router.include_router(jump_router, prefix="/jump", tags=["jump"])
