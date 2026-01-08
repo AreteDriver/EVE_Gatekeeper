@@ -16,6 +16,9 @@ class System(BaseModel):
     security: float
     category: str  # highsec, lowsec, nullsec, wh
     position: Position
+    # Station data for jump planning (cyno lighting)
+    has_npc_station: bool = False
+    station_count: int = 0
 
 
 class Gate(BaseModel):

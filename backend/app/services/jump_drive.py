@@ -218,7 +218,7 @@ def find_systems_in_range(
                     distance_ly=round(distance_ly, 2),
                     security=system.security,
                     category=system.category,
-                    has_npc_station=False,  # TODO: Add station data
+                    has_npc_station=system.has_npc_station,
                     fuel_required=0,  # Calculated separately
                 )
             )
